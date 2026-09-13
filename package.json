@@ -1,5 +1,17 @@
 {
+  "name": "kisan-setu",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo Static site ready in frontend/",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
+  },
   "dependencies": {
     "@supabase/server": "^1.6.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.131.1"
   }
 }
+

@@ -45,3 +45,6 @@ ENV/
 scratch/
 tmp/
 
+# Cloudflare / Wrangler
+.wrangler/
+
