@@ -29,6 +29,8 @@
     isListening: false,
     isSpeaking: false,
     ttsEnabled: true,
+    hasSpokenWelcome: false,
+    welcomeAudioText: '',
     currentLanguage: 'hi-IN', // 'hi-IN' or 'en-IN'
     activeUtterance: null,
     recognition: null,
@@ -335,7 +337,11 @@
     if (UI.micBtn) UI.micBtn.classList.remove('kv-listening');
     if (UI.statusBanner && !State.isSpeaking) UI.statusBanner.style.display = 'none';
     if (State.recognition) {
-      try { State.recognition.stop(); } catch (e) {}
+      try {
+        State.recognition.abort();
+      } catch (e) {
+        try { State.recognition.stop(); } catch (err) {}
+      }
     }
   }
 
@@ -343,6 +349,8 @@
   // 4. TEXT TO SPEECH (TTS) SETUP
   // -------------------------------------------------------------
   function speakText(text) {
+    // Only speak when assistant popup is open and TTS is enabled
+    if (!State.isOpen) return;
     if (!State.ttsEnabled || !window.speechSynthesis) return;
 
     stopSpeaking();
@@ -368,6 +376,11 @@
     }
 
     utterance.onstart = () => {
+      // If closed between trigger and speech start, halt immediately
+      if (!State.isOpen) {
+        stopSpeaking();
+        return;
+      }
       State.isSpeaking = true;
       if (UI.headerEqualizer) UI.headerEqualizer.style.display = 'inline-flex';
       if (UI.statusBanner) {
@@ -383,7 +396,7 @@
       if (UI.statusBanner && !State.isListening) UI.statusBanner.style.display = 'none';
       document.querySelectorAll('.kv-read-btn.kv-playing').forEach(btn => {
         btn.classList.remove('kv-playing');
-        btn.innerHTML = '🔊 सुनो';
+        btn.innerHTML = '🔊 सुनो (Listen)';
       });
     };
 
@@ -391,6 +404,10 @@
       State.isSpeaking = false;
       if (UI.headerEqualizer) UI.headerEqualizer.style.display = 'none';
       if (UI.statusBanner && !State.isListening) UI.statusBanner.style.display = 'none';
+      document.querySelectorAll('.kv-read-btn.kv-playing').forEach(btn => {
+        btn.classList.remove('kv-playing');
+        btn.innerHTML = '🔊 सुनो (Listen)';
+      });
     };
 
     State.activeUtterance = utterance;
@@ -398,16 +415,35 @@
   }
 
   function stopSpeaking() {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
     State.isSpeaking = false;
-    State.activeUtterance = null;
+
+    if (State.activeUtterance) {
+      State.activeUtterance.onstart = null;
+      State.activeUtterance.onend = null;
+      State.activeUtterance.onerror = null;
+      State.activeUtterance = null;
+    }
+
+    if (window.speechSynthesis) {
+      try {
+        window.speechSynthesis.cancel();
+        // Chromium flush workaround for pending or active speech
+        if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.resume();
+          window.speechSynthesis.cancel();
+        }
+      } catch (e) {
+        console.warn("speechSynthesis cancel error:", e);
+      }
+    }
+
     if (UI.headerEqualizer) UI.headerEqualizer.style.display = 'none';
     if (UI.statusBanner && !State.isListening) UI.statusBanner.style.display = 'none';
     document.querySelectorAll('.kv-read-btn.kv-playing').forEach(btn => {
       btn.classList.remove('kv-playing');
-      btn.innerHTML = '🔊 सुनो';
+      btn.innerHTML = '🔊 सुनो (Listen)';
     });
   }
 
@@ -440,7 +476,7 @@
     scrollToBottom();
   }
 
-  function appendBotMessage(data) {
+  function appendBotMessage(data, autoSpeak = true) {
     const msgEl = document.createElement('div');
     msgEl.className = 'kv-msg kv-msg-bot';
 
@@ -501,8 +537,8 @@
 
     scrollToBottom();
 
-    // Auto speak if TTS enabled
-    if (State.ttsEnabled && data.audio_text) {
+    // Auto speak ONLY if permitted, popup is currently open, and TTS enabled
+    if (autoSpeak && State.isOpen && State.ttsEnabled && data.audio_text) {
       speakText(data.audio_text);
     }
   }
@@ -560,7 +596,9 @@
       ]
     };
 
-    appendBotMessage(welcomeData);
+    State.welcomeAudioText = welcomeData.audio_text;
+    // Render the initial welcome message without auto-playing audio
+    appendBotMessage(welcomeData, false);
   }
 
   function scrollToBottom() {
@@ -606,7 +644,7 @@
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       loadingEl.remove();
-      appendBotMessage(data);
+      appendBotMessage(data, State.isOpen);
 
     } catch (err) {
       console.warn("KisanVoiceAssistant: Backend query fallback triggered:", err.message);
@@ -614,7 +652,7 @@
 
       // 2. Intelligent local fallback engine
       const localResp = processLocalQuery(cleanQuery);
-      appendBotMessage(localResp);
+      appendBotMessage(localResp, State.isOpen);
     }
   }
 
@@ -724,17 +762,42 @@
   // -------------------------------------------------------------
   // 7. EVENT BINDINGS & CONTROLS
   // -------------------------------------------------------------
+  function openPopup() {
+    if (State.isOpen) return;
+    State.isOpen = true;
+    State.isMinimized = false;
+    UI.popup.classList.add('kv-open');
+    UI.popup.classList.remove('kv-minimized');
+    if (UI.minimizeBtn) {
+      UI.minimizeBtn.textContent = '➖';
+      UI.minimizeBtn.title = 'छोटा करें (Minimize)';
+    }
+    setTimeout(() => {
+      if (UI.textInput) UI.textInput.focus();
+    }, 250);
+
+    // Speak welcome message on first open click if TTS is enabled
+    if (!State.hasSpokenWelcome && State.welcomeAudioText && State.ttsEnabled) {
+      State.hasSpokenWelcome = true;
+      speakText(State.welcomeAudioText);
+    }
+  }
+
+  function closePopup() {
+    if (!State.isOpen) return;
+    State.isOpen = false;
+    State.isMinimized = false;
+    UI.popup.classList.remove('kv-open');
+    UI.popup.classList.remove('kv-minimized');
+    stopSpeaking();
+    stopListening();
+  }
+
   function togglePopup() {
-    State.isOpen = !State.isOpen;
     if (State.isOpen) {
-      UI.popup.classList.add('kv-open');
-      UI.popup.classList.remove('kv-minimized');
-      State.isMinimized = false;
-      setTimeout(() => UI.textInput.focus(), 250);
+      closePopup();
     } else {
-      UI.popup.classList.remove('kv-open');
-      stopListening();
-      stopSpeaking();
+      openPopup();
     }
   }
 
@@ -753,14 +816,21 @@
   }
 
   function bindEvents() {
-    // Launcher button toggle
+    // Launcher button toggle (opens if closed, closes if open)
     UI.launcher.addEventListener('click', togglePopup);
 
-    // Close button
-    UI.closeBtn.addEventListener('click', togglePopup);
+    // Close button (always closes and immediately stops speech & mic)
+    UI.closeBtn.addEventListener('click', closePopup);
 
     // Minimize button
     UI.minimizeBtn.addEventListener('click', toggleMinimize);
+
+    // Close on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && State.isOpen) {
+        closePopup();
+      }
+    });
 
     // TTS Mute toggle
     UI.ttsToggleBtn.addEventListener('click', () => {
@@ -782,6 +852,7 @@
       stopListening();
       stopSpeaking();
       UI.chatBody.innerHTML = '';
+      State.hasSpokenWelcome = false;
       showWelcomeMessage();
     });
 
@@ -825,14 +896,11 @@
   // 8. PUBLIC API & DOMCONTENTLOADED INITIALIZATION
   // -------------------------------------------------------------
   const KisanVoiceAssistant = {
-    open: () => {
-      if (!State.isOpen) togglePopup();
-    },
-    close: () => {
-      if (State.isOpen) togglePopup();
-    },
+    open: () => openPopup(),
+    close: () => closePopup(),
+    toggle: () => togglePopup(),
     ask: (question) => {
-      if (!State.isOpen) togglePopup();
+      openPopup();
       submitQuery(question);
     },
     speak: (text) => speakText(text),
