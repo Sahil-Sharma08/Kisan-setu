@@ -1055,7 +1055,7 @@
         const quickBookBtn = document.getElementById('btn-quick-book');
 
         try {
-          const res = await fetch(`http://127.0.0.1:8000/api/v1/soil-testing/farmer/${phoneOrId}`);
+          const res = await fetch(`/api/v1/soil-testing/farmer/${phoneOrId}`);
           if (res.ok) {
             const data = await res.json();
             currentFarmerData = data;
@@ -1303,7 +1303,7 @@
         const slot = document.getElementById('modal-book-slot').value;
 
         try {
-          const res = await fetch('http://127.0.0.1:8000/api/v1/soil-testing/book', {
+          const res = await fetch('/api/v1/soil-testing/book', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1358,7 +1358,7 @@
         };
 
         try {
-          const res = await fetch('http://127.0.0.1:8000/api/v1/soil-testing/update-report', {
+          const res = await fetch('/api/v1/soil-testing/update-report', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
