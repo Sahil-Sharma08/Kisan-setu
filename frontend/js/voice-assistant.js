@@ -775,12 +775,6 @@
     setTimeout(() => {
       if (UI.textInput) UI.textInput.focus();
     }, 250);
-
-    // Speak welcome message on first open click if TTS is enabled
-    if (!State.hasSpokenWelcome && State.welcomeAudioText && State.ttsEnabled) {
-      State.hasSpokenWelcome = true;
-      speakText(State.welcomeAudioText);
-    }
   }
 
   function closePopup() {
@@ -828,6 +822,17 @@
     // Close on Escape key
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && State.isOpen) {
+        closePopup();
+      }
+    });
+
+    // Close when tapping/clicking anywhere outside the assistant popup
+    document.addEventListener('pointerdown', (e) => {
+      if (!State.isOpen) return;
+      const isInsidePopup = UI.popup && UI.popup.contains(e.target);
+      const isInsideLauncher = UI.launcher && UI.launcher.contains(e.target);
+      const isHeaderOpenBtn = e.target.closest && e.target.closest('button[onclick*="KisanVoiceAssistant"]');
+      if (!isInsidePopup && !isInsideLauncher && !isHeaderOpenBtn) {
         closePopup();
       }
     });
