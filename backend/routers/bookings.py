@@ -47,7 +47,14 @@ def _format_booking(b: Booking) -> dict:
         "digitalSig": b.digital_sig or signed_payload.get("digitalSig"),
         "timeWindow": signed_payload.get("timeWindow"),
         "signedPayload": signed_payload,
-        "qrPayload": json.dumps(signed_payload)
+        "qrPayload": json.dumps(signed_payload),
+        "jFormId": getattr(b, "j_form_id", None),
+        "jFormData": getattr(b, "j_form_data", None),
+        "grossWeightKg": getattr(b, "gross_weight_kg", 0.0),
+        "tareWeightKg": getattr(b, "tare_weight_kg", 0.0),
+        "netWeightKg": getattr(b, "net_weight_kg", 0.0),
+        "unloadingBayId": getattr(b, "unloading_bay_id", None),
+        "transitDelayReason": getattr(b, "transit_delay_reason", None)
     }
 
 @router.post("/bookings", status_code=status.HTTP_201_CREATED)

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from backend.models import Base, Center, Booking, QueueEntry, CircuitBreakerEvent
+from backend.models import Base, Center, Booking, QueueEntry, CircuitBreakerEvent, JFormRecord
 from backend.throughput_engine import (
     calculate_hourly_capacity,
     get_capacity_tier,
@@ -23,6 +23,11 @@ from backend.qr_security import (
     verify_digital_signature,
     validate_arrival_window,
     create_signed_token_payload
+)
+from backend.j_form_service import (
+    calculate_j_form_metrics,
+    generate_statutory_j_form,
+    get_crop_msp_rate
 )
 
 class TestThroughputEngine(unittest.TestCase):
@@ -231,6 +236,216 @@ class TestStateMachine(unittest.TestCase):
                 metadata={},
                 db=db
             )
+
+        db.close()
+
+    def test_two_stage_weighment_lifecycle_and_aliases(self):
+        # Physical 8-Stage Cycle:
+        # [BOOKED] -> [GATE_SCANNED] -> [ASSAY_TESTING] -> [GROSS_WEIGHED]
+        # -> [UNLOADING_BAY] -> [TARE_WEIGHED] -> [J_FORM_ISSUED] -> [DBT_DISPATCHED]
+        stages = [
+            ("BOOKED", "GATE_SCANNED"),
+            ("GATE_SCANNED", "ASSAY_TESTING"),
+            ("ASSAY_TESTING", "GROSS_WEIGHED"),
+            ("GROSS_WEIGHED", "UNLOADING_BAY"),
+            ("UNLOADING_BAY", "TARE_WEIGHED"),
+            ("TARE_WEIGHED", "J_FORM_ISSUED"),
+            ("J_FORM_ISSUED", "DBT_DISPATCHED")
+        ]
+        for src, dst in stages:
+            ok, msg = validate_state_transition(src, dst)
+            self.assertTrue(ok, f"Transition {src} -> {dst} failed: {msg}")
+
+        # Test Backward Compatible Aliases
+        ok, _ = validate_state_transition("ASSAY_TESTING", "WEIGHBRIDGE_IN")
+        self.assertTrue(ok)
+        ok, _ = validate_state_transition("WEIGHBRIDGE_IN", "UNLOADING_BAY")
+        self.assertTrue(ok)
+        ok, _ = validate_state_transition("UNLOADING_BAY", "WEIGHBRIDGE_OUT")
+        self.assertTrue(ok)
+
+    def test_reversed_weight_anomaly(self):
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(engine)
+        SessionLocal = sessionmaker(bind=engine)
+        db = SessionLocal()
+
+        booking = Booking(
+            id="BKG-ANOMALY-01",
+            token_id="KS-TKN-ANOMALY",
+            farmer_id="FARM-02",
+            farmer_name="Rameshwar Dayal",
+            farmer_phone="9876543211",
+            center_id="CTR-KARNAL-01",
+            center_name="Karnal Mandi",
+            district="Karnal",
+            commodity="Wheat",
+            quantity_qtl=50.0,
+            vehicle_number="HR-05-ZZ-9999",
+            booking_date="2026-09-15",
+            time_slot="09:00 AM – 10:00 AM",
+            current_stage="UNLOADING_BAY",
+            gross_weight_kg=20000.0,
+            stage_history="[]"
+        )
+        db.add(booking)
+        db.commit()
+
+        # Tare weight (25000 kg) > Gross weight (20000 kg) is physically impossible
+        with self.assertRaises(ValueError) as ctx:
+            transition_token_state(
+                booking=booking,
+                next_stage="TARE_WEIGHED",
+                metadata={"tare_weight_kg": 25000.0, "gross_weight_kg": 20000.0},
+                db=db
+            )
+        self.assertIn("ANOMALY_WEIGHT_REVERSED", str(ctx.exception))
+        db.close()
+
+    def test_unloading_bay_sequence_enforcement(self):
+        # Skipping UNLOADING_BAY directly from GROSS_WEIGHED to TARE_WEIGHED is disallowed
+        ok, msg = validate_state_transition("GROSS_WEIGHED", "TARE_WEIGHED")
+        self.assertFalse(ok)
+        self.assertIn("Invalid transition", msg)
+
+    def test_jform_gating_before_dbt_dispatched(self):
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(engine)
+        SessionLocal = sessionmaker(bind=engine)
+        db = SessionLocal()
+
+        booking = Booking(
+            id="BKG-NO-JFORM",
+            token_id="KS-TKN-NOJF",
+            farmer_id="FARM-03",
+            farmer_name="Kuldeep Singh",
+            center_id="CTR-KARNAL-01",
+            center_name="Karnal Mandi",
+            commodity="Wheat",
+            booking_date="2026-09-15",
+            time_slot="09:00 AM – 10:00 AM",
+            current_stage="J_FORM_ISSUED",
+            j_form_id=None,  # No J-Form generated
+            stage_history="[]"
+        )
+        db.add(booking)
+        db.commit()
+
+        # Cannot dispatch DBT if legal J-Form receipt was not generated
+        with self.assertRaises(ValueError) as ctx:
+            transition_token_state(
+                booking=booking,
+                next_stage="DBT_DISPATCHED",
+                metadata={},
+                db=db
+            )
+        self.assertIn("J_FORM_REQUIRED", str(ctx.exception))
+        db.close()
+
+    def test_transit_delay_and_standby_transitions(self):
+        # Farmer reporting transit delay
+        ok, _ = validate_state_transition("BOOKED", "TRANSIT_DELAYED")
+        self.assertTrue(ok)
+        # Transit delayed vehicle arriving and admitted at gate
+        ok, _ = validate_state_transition("TRANSIT_DELAYED", "GATE_SCANNED")
+        self.assertTrue(ok)
+
+        # Standby overdue admitted by supervisor override
+        ok, _ = validate_state_transition("STANDBY_OVERDUE", "GATE_SCANNED")
+        self.assertTrue(ok)
+
+
+class TestJFormService(unittest.TestCase):
+    """Unit tests for Statutory Digital J-Form (e-JForm) & MSP Procurement Receipt Engine"""
+
+    def test_metric_calculations_standard(self):
+        # 5,000 kg net grain = 50.00 Quintals
+        # MSP = ₹2,425.00/Qtl
+        # Gross = 50 * 2425 = ₹1,21,250.00
+        # Moisture 11.2% (under 12.0% ceiling) -> 0 dockage
+        metrics = calculate_j_form_metrics(
+            net_weight_kg=5000.0,
+            msp_per_quintal=2425.0,
+            moisture_percent=11.2,
+            quality_grade="Grade A (FAQ)"
+        )
+        self.assertEqual(metrics["netQuintals"], 50.0)
+        self.assertEqual(metrics["grossAmount"], 121250.0)
+        self.assertEqual(metrics["moistureDeduction"], 0.0)
+        self.assertEqual(metrics["totalDeductions"], 0.0)
+        self.assertEqual(metrics["netPayableAmount"], 121250.0)
+
+    def test_metric_calculations_moisture_dockage(self):
+        # 5,000 kg net grain = 50.00 Quintals @ ₹2,425.00 = ₹1,21,250.00
+        # Moisture 13.0% (1.0% excess over 12.0%)
+        # Dockage = 1.0% excess * 0.5% = 0.5% of gross
+        # 121,250 * 0.005 = ₹606.25
+        # Net Payable = 121,250 - 606.25 = ₹1,20,643.75
+        metrics = calculate_j_form_metrics(
+            net_weight_kg=5000.0,
+            msp_per_quintal=2425.0,
+            moisture_percent=13.0,
+            quality_grade="Grade A"
+        )
+        self.assertEqual(metrics["netQuintals"], 50.0)
+        self.assertEqual(metrics["grossAmount"], 121250.0)
+        self.assertEqual(metrics["moistureDeduction"], 606.25)
+        self.assertEqual(metrics["totalDeductions"], 606.25)
+        self.assertEqual(metrics["netPayableAmount"], 120643.75)
+
+    def test_j_form_db_generation_and_persistence(self):
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(engine)
+        SessionLocal = sessionmaker(bind=engine)
+        db = SessionLocal()
+
+        center = Center(
+            id="CTR-KARNAL-01",
+            name="Karnal Mandi",
+            district="Karnal",
+            state="Haryana",
+            address="GT Road",
+            commodity="Wheat (गेहूं)"
+        )
+        db.add(center)
+
+        booking = Booking(
+            id="BKG-JF-TEST-01",
+            token_id="KS-TKN-90210",
+            farmer_id="FARM-99",
+            farmer_name="Harbhajan Singh",
+            farmer_phone="9876543299",
+            center_id="CTR-KARNAL-01",
+            center_name="Karnal Mandi",
+            district="Karnal",
+            commodity="Wheat",
+            quantity_qtl=50.0,
+            vehicle_number="HR-05-AA-5544",
+            booking_date="2026-09-15",
+            time_slot="09:00 AM – 10:00 AM",
+            current_stage="UNLOADING_BAY",
+            gross_weight_kg=35000.0,
+            tare_weight_kg=15000.0,
+            assay_moisture=11.5,
+            stage_history="[]"
+        )
+        db.add(booking)
+        db.commit()
+
+        # Generate statutory J-Form
+        jf_data = generate_statutory_j_form(booking, db, operator_id="OP-WEIGH-02")
+        self.assertIsNotNone(jf_data)
+        self.assertEqual(jf_data["jFormNumber"], "JF-HR-2026-90210")
+        self.assertEqual(booking.net_weight_kg, 20000.0)
+        self.assertEqual(jf_data["weighment"]["netQuintals"], 200.0)
+        self.assertIn("signature", jf_data["digitalVerification"])
+
+        # Check DB JFormRecord persistence
+        record = db.query(JFormRecord).filter(JFormRecord.id == "JF-HR-2026-90210").first()
+        self.assertIsNotNone(record)
+        self.assertEqual(record.net_weight_kg, 20000.0)
+        self.assertEqual(record.farmer_name, "Harbhajan Singh")
+        self.assertTrue(len(record.digital_signature) > 10)
 
         db.close()
 

@@ -82,7 +82,7 @@ class Booking(Base):
     queue_position = Column(Integer, default=0)
 
     # State-Machine & Anti-Hoarding Fields
-    current_stage = Column(String, default="BOOKED")            # 'BOOKED', 'GATE_SCANNED', 'ASSAY_TESTING', 'WEIGHBRIDGE_IN', 'WEIGHBRIDGE_OUT', 'DBT_DISPATCHED', 'STANDBY_OVERDUE', 'REJECTED_QUALITY', 'CANCELLED'
+    current_stage = Column(String, default="BOOKED")            # 'BOOKED', 'TRANSIT_DELAYED', 'STANDBY_OVERDUE', 'GATE_SCANNED', 'ASSAY_TESTING', 'REJECTED_QUALITY', 'GROSS_WEIGHED', 'UNLOADING_BAY', 'TARE_WEIGHED', 'J_FORM_ISSUED', 'DBT_DISPATCHED', 'CANCELLED'
     arrival_window_start = Column(DateTime, nullable=True)
     arrival_window_end = Column(DateTime, nullable=True)
     digital_sig = Column(String, nullable=True)
@@ -91,6 +91,23 @@ class Booking(Base):
     gross_weight = Column(Float, default=0.0)
     tare_weight = Column(Float, default=0.0)
     net_weight = Column(Float, default=0.0)
+
+    # Physical Two-Stage Weighment & Unloading Cycle
+    gross_weight_kg = Column(Float, default=0.0)
+    tare_weight_kg = Column(Float, default=0.0)
+    net_weight_kg = Column(Float, default=0.0)
+    unloading_bay_id = Column(String, nullable=True)
+    gross_weighbridge_id = Column(String, nullable=True)
+    tare_weighbridge_id = Column(String, nullable=True)
+
+    # Statutory e-J-Form (MSP Receipt)
+    j_form_id = Column(String, nullable=True)
+    j_form_data = Column(Text, nullable=True)                  # JSON representation of legal J-Form
+
+    # Transit Delay Grace Protocol
+    transit_delay_reason = Column(String, nullable=True)
+    transit_delay_reported_at = Column(DateTime, nullable=True)
+
     assay_moisture = Column(Float, nullable=True)
     assay_quality_grade = Column(String, nullable=True)
     dbt_ref_no = Column(String, nullable=True)
@@ -115,15 +132,55 @@ class QueueEntry(Base):
     arrival_status = Column(String, default="checked_in")
     status = Column(String, default="कतार में प्रतीक्षा (Waiting in Queue)")
 
-    # State-Machine Sync
+    # State-Machine Sync & Physical Mandi Cycle
     current_stage = Column(String, default="BOOKED")
+    queue_type = Column(String, default="NORMAL")               # 'NORMAL' or 'STANDBY'
     assigned_bay = Column(String, nullable=True)
     assigned_weighbridge = Column(String, nullable=True)
     gross_weight = Column(Float, default=0.0)
     tare_weight = Column(Float, default=0.0)
     net_weight = Column(Float, default=0.0)
+    gross_weight_kg = Column(Float, default=0.0)
+    tare_weight_kg = Column(Float, default=0.0)
+    net_weight_kg = Column(Float, default=0.0)
+    unloading_bay_id = Column(String, nullable=True)
+    gross_weighbridge_id = Column(String, nullable=True)
+    tare_weighbridge_id = Column(String, nullable=True)
+    j_form_id = Column(String, nullable=True)
     assay_moisture = Column(Float, nullable=True)
     dbt_status = Column(String, default="PENDING")
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class JFormRecord(Base):
+    __tablename__ = "j_form_records"
+
+    id = Column(String, primary_key=True, index=True)           # e.g. JF-HR-2026-10492
+    booking_id = Column(String, index=True, nullable=False)
+    token_id = Column(String, index=True, nullable=False)
+    farmer_name = Column(String, nullable=False)
+    farmer_phone = Column(String, nullable=True)
+    farmer_aadhaar_masked = Column(String, nullable=False)
+    center_id = Column(String, index=True, nullable=False)
+    center_name = Column(String, nullable=False)
+    district = Column(String, nullable=False)
+    commodity = Column(String, nullable=False)
+    crop_variety = Column(String, default="FAQ Grade-1")
+    gross_weight_kg = Column(Float, default=0.0)
+    tare_weight_kg = Column(Float, default=0.0)
+    net_weight_kg = Column(Float, default=0.0)
+    net_quintals = Column(Float, default=0.0)
+    moisture_percent = Column(Float, default=10.0)
+    quality_grade = Column(String, default="Grade A")
+    msp_rate_per_qtl = Column(Float, default=2425.0)
+    gross_amount = Column(Float, default=0.0)
+    deductions_amount = Column(Float, default=0.0)
+    net_amount = Column(Float, default=0.0)
+    bank_account_masked = Column(String, default="XXXXXX4819")
+    bank_ifsc = Column(String, default="PUNB0123400")
+    bank_name = Column(String, default="Punjab National Bank")
+    dbt_status = Column(String, default="INITIATED")
+    dbt_transaction_id = Column(String, nullable=True)
+    digital_signature = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 class ProcurementRecord(Base):
