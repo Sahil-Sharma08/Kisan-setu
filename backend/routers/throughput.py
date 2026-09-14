@@ -132,8 +132,8 @@ def get_superintendent_telemetry(
             "alertMessage": "Assay Bay 2 average wait time elevated: 38.5 mins (Moisture calibration variance)"
         },
         {
-            "stageKey": "WEIGHBRIDGE_IN",
-            "stageNameEn": "Weighbridge In (Gross)",
+            "stageKey": "GROSS_WEIGHED",
+            "stageNameEn": "Gross Scale 1 (Loaded)",
             "stageNameHi": "सकल इलेक्ट्रॉनिक तौल",
             "icon": "⚖️",
             "avgMinutes": 6.5,
@@ -145,8 +145,21 @@ def get_superintendent_telemetry(
             "queueCount": 2
         },
         {
-            "stageKey": "WEIGHBRIDGE_OUT",
-            "stageNameEn": "Weighbridge Out (Net Tare)",
+            "stageKey": "UNLOADING_BAY",
+            "stageNameEn": "Unloading Sheds / Silos",
+            "stageNameHi": "अनलोडिंग गोदाम शेड",
+            "icon": "📦",
+            "avgMinutes": 14.8,
+            "benchmarkMinutes": 12.0,
+            "thresholdWarning": 20.0,
+            "status": "OPTIMAL",
+            "statusLabel": "सामान्य (Smooth)",
+            "color": "emerald",
+            "queueCount": 4
+        },
+        {
+            "stageKey": "TARE_WEIGHED",
+            "stageNameEn": "Tare Scale 2 (Empty)",
             "stageNameHi": "खाली वाहन तौल (Net Tare)",
             "icon": "🌾",
             "avgMinutes": 4.8,
@@ -156,6 +169,19 @@ def get_superintendent_telemetry(
             "statusLabel": "सामान्य (Smooth)",
             "color": "emerald",
             "queueCount": 2
+        },
+        {
+            "stageKey": "J_FORM_ISSUED",
+            "stageNameEn": "Statutory e-J-Form",
+            "stageNameHi": "डिजिटल जे-फॉर्म जारी",
+            "icon": "📜",
+            "avgMinutes": 1.5,
+            "benchmarkMinutes": 2.0,
+            "thresholdWarning": 5.0,
+            "status": "OPTIMAL",
+            "statusLabel": "त्वरित (Instant Digital)",
+            "color": "emerald",
+            "queueCount": 1
         },
         {
             "stageKey": "DBT_DISPATCHED",

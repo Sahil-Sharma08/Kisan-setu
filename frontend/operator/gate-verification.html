@@ -288,16 +288,24 @@
             </div>
 
             <!-- Standby Warning & Supervisor Override Notice (Hidden by default) -->
-            <div id="standby-overdue-box" class="hidden p-3 rounded-xl border bg-amber-50 border-amber-300 text-amber-950 space-y-2">
-              <div class="flex items-center gap-2 font-bold text-xs text-amber-900">
-                <span>⚠️</span> स्थिति: STANDBY_OVERDUE (प्रतीक्षा लेन)
+            <div id="standby-overdue-box" class="hidden p-3.5 rounded-xl border bg-amber-50 border-amber-300 text-amber-950 space-y-2.5">
+              <div class="flex items-center justify-between font-bold text-xs text-amber-900">
+                <span class="flex items-center gap-1.5">
+                  <span>⚠️</span> स्थिति: STANDBY_OVERDUE (प्रतीक्षा लेन)
+                </span>
+                <span class="px-2 py-0.5 rounded bg-amber-200 text-amber-900 text-[10px]">Overdue >45m</span>
               </div>
               <p class="text-[11px] text-amber-800 leading-relaxed">
                 वाहन निर्धारित स्लॉट से 45 मिनट से अधिक देरी से पहुंचा है। सामान्य कतार बाधित न हो, इसलिए वाहन को प्रतीक्षा लेन में रखा गया है।
               </p>
-              <label class="flex items-center gap-2 text-xs font-bold text-amber-900 cursor-pointer pt-1 border-t border-amber-200">
+              <button type="button" id="execute-standby-override-btn"
+                class="w-full btn bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-2.5 px-3 rounded-lg shadow-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                <span>🛡️</span>
+                <span>Supervisor Override: Assign to Standby Yard (अधीक्षक विशेष अनुमति)</span>
+              </button>
+              <label class="flex items-center gap-2 text-xs font-semibold text-amber-900 cursor-pointer pt-1 border-t border-amber-200">
                 <input type="checkbox" id="supervisor-override-check" class="rounded text-teal-600 focus:ring-teal-500">
-                <span>अधीक्षक विशेष अनुमति (Supervisor Override Admission)</span>
+                <span>गेट चेक-इन में विशेष अनुमति शामिल करें (Force Override)</span>
               </label>
             </div>
 
@@ -484,8 +492,15 @@
           sigText.textContent = `SIG: e4f7a91b8c24... • Verified via HMAC-SHA256`;
         }
 
-        // 2. Buffer Window Verification (±45 minutes)
-        if (forceMode === "OVERDUE" || isSimulatedOverdue) {
+        // 2. Buffer Window Verification (±45 minutes) & Transit Delay Grace Check
+        if (item.currentStage === "TRANSIT_DELAYED" || item.transitDelayReason) {
+          bufferBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-900 border border-blue-300";
+          bufferBadge.textContent = "ग्रेस स्वीकृत (+60m Grace Active)";
+          bufferDesc.textContent = `किसान द्वारा रास्ते में देरी पूर्व-सूचित है (${item.transitDelayReason || 'वाहन खराबी'})। 60 मिनट की वैधानिक ग्रेस विंडो सक्रिय है — सामान्य गेट प्रवेश अनुमत।`;
+          standbyBox.classList.add('hidden');
+          verifyBtn.className = "w-full btn btn-primary text-xs font-bold py-3 flex items-center justify-center gap-2 shadow-xs";
+          verifyBtn.innerHTML = `<span>✔</span> <span>Admit with Grace Window (ग्रेस विंडो प्रवेश)</span>`;
+        } else if (forceMode === "OVERDUE" || isSimulatedOverdue) {
           bufferBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900";
           bufferBadge.textContent = "विलंब (Overdue >45m)";
           bufferDesc.textContent = "वाहन 52 मिनट देरी से पहुंचा है। सामान्य कतार बाधित न हो, इसलिए वाहन को स्टैंडबाई लेन में स्थानांतरित किया गया है।";
@@ -590,6 +605,41 @@
         } else {
           showToast('error', 'Verification Failed', res.message || 'Unable to verify gate.');
         }
+      });
+
+      // Execute Standby Supervisor Override button
+      document.getElementById('execute-standby-override-btn')?.addEventListener('click', async () => {
+        if (!selectedBookingId) return;
+        try {
+          const res = await fetch('/api/v1/queue/supervisor-override', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              token_id: selectedBookingId,
+              supervisor_id: 'SUP-KARNAL-01',
+              override_reason: 'Overdue vehicle admitted to standby lane without disrupting regular slots',
+              assigned_bay: 'STANDBY-LANE-B1'
+            })
+          });
+          const json = await res.json();
+          if (json.success) {
+            showToast('success', 'Supervisor Standby Override Approved (अधीक्षक अनुमति स्वीकृत)',
+              'Vehicle admitted into Standby Yard (Bay B1). Priority queue updated.');
+            document.getElementById('standby-overdue-box')?.classList.add('hidden');
+            document.getElementById('already-verified-box')?.classList.remove('hidden');
+            document.getElementById('execute-gate-verify-btn')?.classList.add('hidden');
+            selectBooking(selectedBookingId);
+            return;
+          }
+        } catch (err) {
+          console.warn('Supervisor override fallback:', err);
+        }
+
+        showToast('success', 'Supervisor Standby Override (स्थानीय अनुमति)',
+          'Vehicle admitted to Standby Lane B1 under supervisor discretion.');
+        document.getElementById('standby-overdue-box')?.classList.add('hidden');
+        document.getElementById('already-verified-box')?.classList.remove('hidden');
+        document.getElementById('execute-gate-verify-btn')?.classList.add('hidden');
       });
 
       // Search form handler

@@ -115,10 +115,10 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1" id="weighing-lanes-container">
-          <!-- Lane 1 Gross -->
+          <!-- Scale 1 Gross -->
           <div class="bg-slate-950 border border-emerald-900/60 rounded-xl p-4 flex flex-col justify-between relative overflow-hidden">
             <div class="absolute top-0 right-0 px-3 py-1 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-bl-lg">
-              LANE #1 • GROSS IN
+              SCALE #1 • GROSS INBOUND (सकल भार)
             </div>
             <div>
               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">टोकन क्रमांक (Token ID)</span>
@@ -137,7 +137,7 @@
                 <span class="text-[10px] text-slate-500 uppercase font-bold">स्थिति (Status)</span>
                 <div class="text-xs font-bold text-emerald-400 flex items-center gap-1.5 mt-0.5">
                   <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  लोड भार दर्ज हो रहा है
+                  सकल भार दर्ज (Gross Scale)
                 </div>
               </div>
               <div class="text-right font-mono-num font-black text-2xl text-white">
@@ -146,10 +146,10 @@
             </div>
           </div>
 
-          <!-- Lane 2 Net/Tare -->
+          <!-- Scale 2 Net/Tare -->
           <div class="bg-slate-950 border border-teal-900/60 rounded-xl p-4 flex flex-col justify-between relative overflow-hidden">
             <div class="absolute top-0 right-0 px-3 py-1 bg-teal-600 text-white text-[10px] font-black uppercase tracking-wider rounded-bl-lg">
-              LANE #2 • TARE OUT
+              SCALE #2 • TARE OUTBOUND (खाली भार)
             </div>
             <div>
               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">टोकन क्रमांक (Token ID)</span>
@@ -168,7 +168,7 @@
                 <span class="text-[10px] text-slate-500 uppercase font-bold">स्थिति (Status)</span>
                 <div class="text-xs font-bold text-teal-400 flex items-center gap-1.5 mt-0.5">
                   <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
-                  खाली वजन दर्ज • शुद्ध गणना
+                  खाली तौल • शुद्ध उपज गणना
                 </div>
               </div>
               <div class="text-right font-mono-num font-black text-2xl text-white">
@@ -176,6 +176,23 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- SECTION 1.5: Unloading Sheds & Silo Storage Bays -->
+      <div class="bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">📦</span>
+            <h2 class="text-base sm:text-lg font-black uppercase tracking-wider text-amber-400">
+              अनलोडिंग गोदाम शेड • Unloading Sheds & Silo Bays
+            </h2>
+          </div>
+          <span class="text-xs font-mono text-slate-400">ACTIVE SHEDS: 3/4</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5" id="unloading-sheds-container">
+          <!-- Populated dynamically by JS -->
         </div>
       </div>
 
@@ -416,6 +433,32 @@
                     ${item.callGate}
                   </span>
                   <div class="text-[10px] text-slate-400 mt-1">~${item.estWaitMins} min</div>
+                </div>
+              </div>
+            `;
+          }).join("");
+        }
+
+        // Unloading Sheds & Silo Storage Bays
+        const shedsContainer = document.getElementById("unloading-sheds-container");
+        if (shedsContainer && data.unloadingSheds && data.unloadingSheds.length > 0) {
+          shedsContainer.innerHTML = data.unloadingSheds.map(shed => {
+            const isComplete = shed.status.includes("COMPLETED");
+            const borderColor = isComplete ? 'border-emerald-800/60 bg-emerald-950/20' : 'border-amber-800/60 bg-amber-950/20';
+            const badgeColor = isComplete ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300 animate-pulse';
+            return `
+              <div class="p-3 rounded-xl border ${borderColor} flex flex-col justify-between">
+                <div class="flex items-center justify-between pb-1.5 border-b border-slate-800/80">
+                  <span class="text-xs font-bold text-white">${shed.bayId}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded ${badgeColor}">${shed.statusLabel}</span>
+                </div>
+                <div class="my-2">
+                  <div class="text-xs font-mono font-bold text-amber-300">${shed.tokenId} • ${shed.vehicleNumber}</div>
+                  <div class="text-xs text-slate-200 truncate mt-0.5">${shed.farmerName} (${shed.commodity})</div>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-slate-400 pt-1.5 border-t border-slate-900">
+                  <span>प्रगति: ${shed.bagsUnloaded}/${shed.totalBags} बोरियां</span>
+                  <span class="font-bold text-white font-mono">${Math.round((shed.bagsUnloaded/shed.totalBags)*100)}%</span>
                 </div>
               </div>
             `;

@@ -36,6 +36,18 @@ class GateCheckinAdvancedRequest(BaseModel):
     operator_notes: Optional[str] = None
     override_reason: Optional[str] = None
 
+class TransitDelayReportRequest(BaseModel):
+    token_id: str
+    reason: str = "ROAD_BLOCKAGE"
+    notes: Optional[str] = None
+
+class SupervisorOverrideRequest(BaseModel):
+    token_id: str
+    supervisor_id: str = "SUP-MAIN-01"
+    override_reason: str = "STANDBY_BAY_ADMISSION"
+    assigned_bay: Optional[str] = "STANDBY-LANE-B1"
+    notes: Optional[str] = None
+
 def _format_queue_item(q: QueueEntry) -> dict:
     return {
         "bookingId": q.booking_id,
@@ -50,13 +62,21 @@ def _format_queue_item(q: QueueEntry) -> dict:
         "estimatedWaitMinutes": q.estimated_wait_minutes,
         "arrivalStatus": q.arrival_status,
         "status": q.status,
+        "queueType": getattr(q, "queue_type", "NORMAL") or "NORMAL",
         "currentStage": getattr(q, "current_stage", "BOOKED") or "BOOKED",
         "stageInfo": STAGE_METADATA.get(getattr(q, "current_stage", "BOOKED"), {}),
         "assignedBay": getattr(q, "assigned_bay", None),
         "assignedWeighbridge": getattr(q, "assigned_weighbridge", None),
+        "unloadingBayId": getattr(q, "unloading_bay_id", None),
+        "grossWeighbridgeId": getattr(q, "gross_weighbridge_id", None),
+        "tareWeighbridgeId": getattr(q, "tare_weighbridge_id", None),
         "grossWeight": getattr(q, "gross_weight", 0.0),
         "tareWeight": getattr(q, "tare_weight", 0.0),
         "netWeight": getattr(q, "net_weight", 0.0),
+        "grossWeightKg": getattr(q, "gross_weight_kg", 0.0),
+        "tareWeightKg": getattr(q, "tare_weight_kg", 0.0),
+        "netWeightKg": getattr(q, "net_weight_kg", 0.0),
+        "jFormId": getattr(q, "j_form_id", None),
         "assayMoisture": getattr(q, "assay_moisture", None),
         "dbtStatus": getattr(q, "dbt_status", "PENDING")
     }
@@ -258,6 +278,139 @@ async def advance_stage_transition(payload: StageTransitionPayload, db: Session 
 
     return result
 
+@router.post("/transit-delay")
+async def report_transit_delay(payload: TransitDelayReportRequest, db: Session = Depends(get_db)):
+    """
+    Farmer Self-Reporting Transit Delay Protocol:
+    1. Shifts arrival window by +60 minutes without slot cancellation.
+    2. Moves state to TRANSIT_DELAYED.
+    3. Broadcasts event to Superintendent Command Center and Yard Screen.
+    """
+    clean_id = payload.token_id.strip().upper()
+    booking = db.query(Booking).filter((Booking.token_id == clean_id) | (Booking.id == clean_id)).first()
+    if not booking:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Token or Booking '{payload.token_id}' not found.")
+
+    if booking.current_stage not in ["BOOKED", "TRANSIT_DELAYED"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Cannot report transit delay in stage '{booking.current_stage}'. Vehicle is already processed."
+        )
+
+    try:
+        result = transition_token_state(
+            booking=booking,
+            next_stage="TRANSIT_DELAYED",
+            metadata={
+                "reason": payload.reason,
+                "notes": payload.notes or "Farmer reported delay via mobile pass",
+                "operator": "FARMER-SELF"
+            },
+            db=db
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+    # WebSocket event
+    await emit_yard_event(booking.center_id, "TRANSIT_DELAY_REPORTED", {
+        "tokenId": booking.token_id,
+        "farmerName": booking.farmer_name,
+        "reason": payload.reason,
+        "newWindowEnd": booking.arrival_window_end.isoformat() if booking.arrival_window_end else None,
+        "graceMinutes": 60
+    })
+
+    return {
+        "success": True,
+        "tokenId": booking.token_id,
+        "currentStage": "TRANSIT_DELAYED",
+        "message": "रास्ते में देरी दर्ज की गई। स्लॉट रद्द नहीं हुआ — 60 मिनट की अतिरिक्त ग्रेस विंडो प्रदान की गई है।",
+        "graceMinutes": 60,
+        "reason": payload.reason,
+        "arrivalWindowEnd": booking.arrival_window_end.isoformat() if booking.arrival_window_end else None
+    }
+
+@router.post("/supervisor-override")
+async def supervisor_override_standby(payload: SupervisorOverrideRequest, db: Session = Depends(get_db)):
+    """
+    Supervisor Standby Override Protocol:
+    Admits an overdue tractor-trolley from STANDBY_OVERDUE into GATE_SCANNED with standby priority.
+    """
+    clean_id = payload.token_id.strip().upper()
+    booking = db.query(Booking).filter((Booking.token_id == clean_id) | (Booking.id == clean_id)).first()
+    if not booking:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Token '{payload.token_id}' not found.")
+
+    curr = booking.current_stage or "BOOKED"
+    if curr not in ["STANDBY_OVERDUE", "BOOKED", "TRANSIT_DELAYED"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Supervisor override not allowed for stage '{curr}'. Token must be in STANDBY_OVERDUE or un-admitted."
+        )
+
+    # Force to STANDBY_OVERDUE if overdue BOOKED, then transition to GATE_SCANNED with queueType=STANDBY
+    if curr != "STANDBY_OVERDUE":
+        booking.current_stage = "STANDBY_OVERDUE"
+
+    try:
+        result = transition_token_state(
+            booking=booking,
+            next_stage="GATE_SCANNED",
+            metadata={
+                "queueType": "STANDBY",
+                "operator": payload.supervisor_id,
+                "notes": f"SUPERVISOR OVERRIDE: {payload.override_reason}",
+                "assignedBay": payload.assigned_bay or "STANDBY-LANE-B1"
+            },
+            db=db
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+    await emit_yard_event(booking.center_id, "SUPERVISOR_STANDBY_ADMITTED", {
+        "tokenId": booking.token_id,
+        "farmerName": booking.farmer_name,
+        "supervisorId": payload.supervisor_id,
+        "assignedBay": payload.assigned_bay or "STANDBY-LANE-B1"
+    })
+
+    return {
+        "success": True,
+        "tokenId": booking.token_id,
+        "status": "GATE_SCANNED_STANDBY",
+        "message": f"अधीक्षक विशेष अनुमति स्वीकृत: {booking.farmer_name} को स्टैंडबाई कतार में प्रवेश दिया गया।",
+        "result": result
+    }
+
+@router.get("/j-form/{token_or_booking_id}")
+def get_statutory_j_form(token_or_booking_id: str, db: Session = Depends(get_db)):
+    """
+    Fetch statutory e-J-Form (Agricultural Produce Market Form 'J') for farmer receipt and superintendent audit.
+    Auto-generates if tare weighment has been recorded.
+    """
+    from backend.j_form_service import generate_statutory_j_form
+
+    clean_id = token_or_booking_id.strip().upper()
+    booking = db.query(Booking).filter((Booking.token_id == clean_id) | (Booking.id == clean_id) | (Booking.j_form_id == clean_id)).first()
+    if not booking:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Procurement record '{token_or_booking_id}' not found.")
+
+    if booking.j_form_data:
+        try:
+            return {
+                "success": True,
+                "jForm": json.loads(booking.j_form_data)
+            }
+        except Exception:
+            pass
+
+    # Generate on-demand if in appropriate stage
+    j_form = generate_statutory_j_form(booking, db, operator_id="AUDIT-SYSTEM")
+    return {
+        "success": True,
+        "jForm": j_form
+    }
+
 @router.post("/advance")
 async def advance_queue(payload: QueueAdvanceRequest, db: Session = Depends(get_db)):
     """
@@ -425,27 +578,88 @@ def get_yard_screen_billboard_data(center_id: str, db: Session = Depends(get_db)
         .all()
     )
 
-    # Formulate Currently in Weighing
+    # Formulate Currently in Weighing with physical two-stage lanes
     currently_weighing = [
         {
-            "lane": "Weighbridge Lane 1",
+            "lane": "Weighbridge Scale 1 (Inbound)",
+            "laneKey": "GROSS_LANE",
             "type": "GROSS (सकल भार)",
             "tokenId": entries[0].token_id if len(entries) > 0 else "KS-TKN-1002",
             "farmerName": entries[0].farmer_name if len(entries) > 0 else "बलविंदर सिंह (Balwinder Singh)",
             "vehicleNumber": "HR-05-BC-8921",
             "commodity": entries[0].commodity if len(entries) > 0 else "Wheat (Grade A)",
             "grossWeight": 45.8,
-            "status": "WEIGHING_IN_PROGRESS"
+            "status": "GROSS_WEIGHING_ACTIVE",
+            "scaleId": "WB-SCALE-01"
         },
         {
-            "lane": "Weighbridge Lane 2",
+            "lane": "Weighbridge Scale 2 (Outbound)",
+            "laneKey": "TARE_LANE",
             "type": "TARE / NET (खाली तौल)",
             "tokenId": entries[1].token_id if len(entries) > 1 else "KS-TKN-1004",
             "farmerName": entries[1].farmer_name if len(entries) > 1 else "राजिंदर कुमार (Rajinder Kumar)",
             "vehicleNumber": "HR-05-PQ-4412",
             "commodity": entries[1].commodity if len(entries) > 1 else "Paddy (PR-126)",
             "grossWeight": 14.2,
-            "status": "TARE_CALIBRATING"
+            "netWeight": 31.6,
+            "status": "TARE_WEIGHING_ACTIVE",
+            "scaleId": "WB-SCALE-02"
+        }
+    ]
+
+    # Unloading Bays / Godown Sheds
+    unloading_sheds = [
+        {
+            "bayId": "SHED-BAY-A1",
+            "shedName": "गोदाम शेड नं. 1 (Central Godown A)",
+            "tokenId": "KS-TKN-1005",
+            "farmerName": "कुलदीप सिंह",
+            "vehicleNumber": "HR-05-AB-7711",
+            "commodity": "Wheat (FAQ Grade-1)",
+            "status": "UNLOADING_IN_PROGRESS",
+            "statusLabel": "बोरी खालीकरण जारी (Unloading)",
+            "color": "amber",
+            "bagsUnloaded": 180,
+            "totalBags": 220
+        },
+        {
+            "bayId": "SHED-BAY-A2",
+            "shedName": "गोदाम शेड नं. 1 (Central Godown A)",
+            "tokenId": "KS-TKN-1007",
+            "farmerName": "जसविंदर चीमा",
+            "vehicleNumber": "PB-11-TR-8821",
+            "commodity": "Paddy (PR-126)",
+            "status": "UNLOADING_COMPLETED",
+            "statusLabel": "खालीकरण पूर्ण • वेईब्रिज-2 प्रस्थान",
+            "color": "emerald",
+            "bagsUnloaded": 250,
+            "totalBags": 250
+        },
+        {
+            "bayId": "SHED-BAY-B1",
+            "shedName": "साइलो प्लेटफार्म नं. 2 (Bulk Silo Shed B)",
+            "tokenId": "KS-TKN-1009",
+            "farmerName": "धर्मपाल यादव",
+            "vehicleNumber": "HR-02-MN-9912",
+            "commodity": "Wheat (Sharbati)",
+            "status": "UNLOADING_IN_PROGRESS",
+            "statusLabel": "अनलोडिंग जारी",
+            "color": "amber",
+            "bagsUnloaded": 95,
+            "totalBags": 200
+        }
+    ]
+
+    # Standby Queue (Outside buffer or delayed arrivals awaiting slot vacancy)
+    standby_queue = [
+        {
+            "tokenId": "KS-TKN-0994",
+            "farmerName": "गुरदीप बाजवा",
+            "vehicleNumber": "PB-02-XY-1011",
+            "commodity": "Wheat",
+            "reason": "STANDBY_OVERDUE (देरी से आगमन)",
+            "status": "STANDBY_WAITING",
+            "overrideEligible": True
         }
     ]
 
@@ -512,6 +726,8 @@ def get_yard_screen_billboard_data(center_id: str, db: Session = Depends(get_db)
         "district": center.district,
         "timestamp": datetime.utcnow().strftime("%d-%m-%Y %H:%M:%S IST"),
         "currentlyWeighing": currently_weighing,
+        "unloadingSheds": unloading_sheds,
+        "standbyQueue": standby_queue,
         "nextInQueue": next_in_queue,
         "assayBays": assay_bays,
         "metrics": {
