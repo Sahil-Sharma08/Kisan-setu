@@ -18,6 +18,8 @@ from backend.routers import (
     analytics,
     assistant,
     soil_testing,
+    throughput,
+    events,
 )
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -52,6 +54,24 @@ app.include_router(complaints.router, prefix="/api/v1")
 app.include_router(analytics.router, prefix="/api/v1")
 app.include_router(assistant.router, prefix="/api/v1")
 app.include_router(soil_testing.router, prefix="/api/v1")
+app.include_router(throughput.router, prefix="/api/v1")
+app.include_router(events.router, prefix="/api/v1")
+
+@app.get("/yard-screen", include_in_schema=False)
+def yard_screen_view():
+    """Direct route for Public Yard Billboard Outdoor TV/Projector Display"""
+    screen_path = os.path.join(FRONTEND_DIR, "yard-screen.html")
+    if os.path.exists(screen_path):
+        return FileResponse(screen_path, media_type="text/html")
+    return RedirectResponse(url="/yard-screen.html")
+
+@app.get("/command-center", include_in_schema=False)
+def command_center_view():
+    """Direct route for Mandi Superintendent Command Center"""
+    cmd_path = os.path.join(FRONTEND_DIR, "admin", "superintendent.html")
+    if os.path.exists(cmd_path):
+        return FileResponse(cmd_path, media_type="text/html")
+    return RedirectResponse(url="/admin/superintendent.html")
 
 @app.on_event("startup")
 def on_startup():

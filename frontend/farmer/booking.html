@@ -43,6 +43,12 @@
 
       <!-- Navigation & Logout -->
       <div class="flex items-center gap-3">
+        <!-- Language Switcher -->
+        <button type="button" onclick="window.KisanI18n && window.KisanI18n.toggleLanguage()"
+          class="kisan-lang-btn px-2.5 py-1.5 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all shadow-2xs cursor-pointer">
+          English / हिन्दी
+        </button>
+
         <button type="button" onclick="window.KisanVoiceAssistant && window.KisanVoiceAssistant.open()"
           class="btn btn-outline btn-sm text-xs font-semibold flex items-center gap-1.5 py-1.5 px-3 text-[#15803d] border-[#15803d] bg-emerald-50/50 hover:bg-emerald-100/60 cursor-pointer">
           <span>🎙️</span> किसान वाणी AI
@@ -224,28 +230,90 @@
         </div>
       </div>
 
-      <!-- Step 3: Select Time Slot -->
-      <div class="card p-6 bg-white border-slate-200 shadow-xs">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+      <!-- Step 3: Select Time Slot (Dynamic Mandi Throughput Engine) -->
+      <div class="card p-6 bg-white border-slate-200 shadow-xs space-y-4">
+        <div class="flex flex-wrap items-center justify-between pb-3 border-b border-slate-100 gap-2">
           <div class="flex items-center gap-2.5">
             <span
               class="w-6 h-6 rounded-full bg-[#15803d] text-white flex items-center justify-center font-bold text-xs">
               3
             </span>
             <div>
-              <h2 class="text-sm font-bold text-slate-900">समय स्लॉट चुनें (Select Time Slot)</h2>
-              <p class="text-[11px] text-slate-500">उपलब्ध 1 घंटे का आगमन स्लॉट चुनें</p>
+              <div class="flex items-center gap-2">
+                <h2 class="text-sm font-bold text-slate-900">समय स्लॉट चुनें • डायनामिक थ्रूपुट इंजन</h2>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  SIH26032 Core
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-500">भौतिक वेईब्रिज क्षमता और थ्रूपुट पर आधारित गतिशील स्लॉट आवंटन</p>
             </div>
           </div>
           <span
-            class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200"
+            class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200"
             id="slot-selected-badge">
             चयनित: कोई नहीं
           </span>
         </div>
 
+        <!-- Hardware Capacity Formula & Throughput Stats -->
+        <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+            <span class="font-bold text-slate-700 flex items-center gap-1.5">
+              <span>⚙️</span> थ्रूपुट सूत्र (Throughput Formula):
+              <code class="font-mono text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200" id="throughput-formula-badge">
+                (2 वेईब्रिज × 10 दर/घंटा) - 2 बफर = 18 वाहन/घंटा
+              </code>
+            </span>
+            <span class="text-[11px] text-slate-500 font-medium" id="throughput-hardware-note">
+              2 Active Weighbridges • Calibrated
+            </span>
+          </div>
+
+          <!-- 3-Tier Legend -->
+          <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-200/80 text-[11px]">
+            <span class="text-slate-400 font-bold uppercase text-[10px]">3-Tier Capacity:</span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+              <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+              &lt; 60% सुगम (Low Load / Fast-Track)
+            </span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
+              <span class="w-2 h-2 rounded-full bg-amber-600"></span>
+              60–85% मध्यम (Moderate Load)
+            </span>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-50 text-rose-800 border border-rose-200 font-semibold">
+              <span class="w-2 h-2 rounded-full bg-rose-600"></span>
+              &gt; 85% अत्यधिक भीड़ (Saturated / Locked)
+            </span>
+          </div>
+        </div>
+
+        <!-- Dynamic Slots Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3" id="slot-options">
-          <!-- Populated by JavaScript -->
+          <!-- Populated by Throughput Engine JS -->
+        </div>
+
+        <!-- Automated Low-Load Nearby Center Suggestion (Anti-Bottleneck Diversion) -->
+        <div id="alternative-mandis-container" class="mt-4 p-4 rounded-xl bg-amber-50/70 border border-amber-200 hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-lg">📍</span>
+              <div>
+                <h4 class="text-xs font-bold text-amber-900">
+                  कम भीड़ वाले नजदीकी खरीद केंद्र (Nearby Low-Load Procurement Mandis)
+                </h4>
+                <p class="text-[11px] text-amber-700">
+                  इस केंद्र पर भीड़ अधिक है। कतार में समय बचाने हेतु नजदीकी केंद्र चुनें:
+                </p>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-200/80 text-amber-900 uppercase">
+              Smart Diversion
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5" id="alternative-mandis-list">
+            <!-- Populated dynamically -->
+          </div>
         </div>
       </div>
 
@@ -318,10 +386,15 @@
     KisanSetu &copy; 2026 • SIH Innovation Project
   </footer>
 
-  <!-- Scripts: Mock Data, Utils, Auth Engine, and Farmer UI -->
+  <!-- Scripts: Mock Data, Utils, Auth Engine, API Client, and Modular Logistics Engines -->
   <script src="../js/mock-data.js"></script>
   <script src="../js/utils.js"></script>
   <script src="../js/auth.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/throughput-engine.js"></script>
+  <script src="../js/qr-security.js"></script>
+  <script src="../js/offline-storage.js"></script>
+  <script src="../js/i18n.js"></script>
   <script src="farmer.js"></script>
   <script src="../js/voice-assistant.js"></script>
 
@@ -490,42 +563,105 @@
         });
       }
 
-      // 7. Render Time Slots
+      // 7. Dynamic Mandi Throughput Engine — Slot Allocation
       const slotOptions = document.getElementById('slot-options');
-      const timeSlots = window.FarmerPortal.getMockTimeSlots();
+      const formulaBadge = document.getElementById('throughput-formula-badge');
+      const hardwareNote = document.getElementById('throughput-hardware-note');
+      const altContainer = document.getElementById('alternative-mandis-container');
+      const altList = document.getElementById('alternative-mandis-list');
 
-      slotOptions.innerHTML = timeSlots.map(slot => {
-        const isFull = slot.state === 'full';
-        if (isFull) {
-          return `
-            <div class="p-3 rounded-lg border border-slate-200 bg-slate-100 text-slate-400 opacity-60 cursor-not-allowed text-xs flex items-center justify-between">
-              <span class="font-medium">${slot.timeRange}</span>
-              <span class="text-[10px] font-semibold bg-rose-100 text-rose-700 px-2 py-0.5 rounded">पूर्ण (Full)</span>
-            </div>
-          `;
+      let dynamicSchedule = null;
+      let timeSlots = [];
+
+      function renderThroughputSlots() {
+        if (!window.KisanThroughput) return;
+
+        const dateIso = selectedDate ? selectedDate.dateIso : new Date().toISOString().split('T')[0];
+        dynamicSchedule = window.KisanThroughput.generateDynamicSchedule(center, dateIso);
+        timeSlots = dynamicSchedule.slots;
+
+        // Update hardware throughput header
+        if (formulaBadge) formulaBadge.textContent = dynamicSchedule.formulaText;
+        if (hardwareNote) {
+          hardwareNote.textContent = `${dynamicSchedule.hourlyCapacity} वाहन/घंटा क्षमता • कुल दैनिक कोटा: ${dynamicSchedule.totalDayCapacity} वाहन`;
         }
 
-        return `
-          <button type="button" class="slot-btn p-3 rounded-lg border border-slate-200 hover:border-emerald-500 bg-white transition-all text-xs flex items-center justify-between text-left" data-slot-id="${slot.id}">
-            <div>
-              <span class="font-bold text-slate-800 block">${slot.timeRange}</span>
-              <span class="text-[10px] text-emerald-600 font-medium">उपलब्ध (Available)</span>
-            </div>
-            <span class="slot-check hidden text-emerald-600 font-bold">✔</span>
-          </button>
-        `;
-      }).join('');
+        // Render 3-tier slots
+        slotOptions.innerHTML = timeSlots.map(slot => {
+          if (slot.isLocked) {
+            return `
+              <div class="p-3.5 rounded-xl border border-rose-300 bg-rose-50/70 text-slate-500 text-xs flex flex-col justify-between opacity-80 cursor-not-allowed select-none relative overflow-hidden">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="font-bold text-slate-700">${slot.timeRange}</span>
+                  <span class="text-[10px] font-black px-2 py-0.5 rounded bg-rose-200 text-rose-800 flex items-center gap-1">
+                    <span>🔒</span> संतृप्त (Locked)
+                  </span>
+                </div>
+                <div class="w-full bg-rose-200 h-1.5 rounded-full overflow-hidden my-1.5">
+                  <div class="bg-rose-600 h-full rounded-full" style="width: ${slot.utilizationPercent}%;"></div>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-rose-800 font-semibold mt-1">
+                  <span>क्षमता पूर्ण: ${slot.bookedVehicles}/${slot.hourlyCapacity} वाहन</span>
+                  <span class="font-bold">${slot.utilizationPercent}% (संतृप्त)</span>
+                </div>
+              </div>
+            `;
+          }
 
-      document.querySelectorAll('.slot-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const slotId = btn.getAttribute('data-slot-id');
-          const slotObj = timeSlots.find(s => s.id === slotId);
-          selectSlot(slotObj);
+          return `
+            <button type="button" class="slot-btn p-3.5 rounded-xl border border-slate-200 hover:border-emerald-600 bg-white transition-all text-xs flex flex-col justify-between text-left cursor-pointer group shadow-2xs hover:shadow-xs" data-slot-id="${slot.id}">
+              <div class="flex items-center justify-between w-full mb-2">
+                <span class="font-bold text-slate-800 text-sm group-hover:text-[#15803d]">${slot.timeRange}</span>
+                <span class="slot-check hidden text-emerald-600 font-black text-sm">✔</span>
+              </div>
+              <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden my-1">
+                <div class="h-full rounded-full transition-all" style="width: ${slot.utilizationPercent}%; background-color: ${slot.colorHex};"></div>
+              </div>
+              <div class="flex items-center justify-between text-[10px] text-slate-500 mt-1.5 w-full">
+                <span class="font-medium">${slot.bookedVehicles}/${slot.hourlyCapacity} वाहन • ${slot.availableCapacity} शेष</span>
+                <span class="font-bold px-1.5 py-0.5 rounded text-[10px] ${slot.badgeClass}">
+                  ${slot.labelHindi.split('(')[0].trim()} (${slot.utilizationPercent}%)
+                </span>
+              </div>
+            </button>
+          `;
+        }).join('');
+
+        // Wire click handlers
+        document.querySelectorAll('.slot-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const slotId = btn.getAttribute('data-slot-id');
+            const slotObj = timeSlots.find(s => s.id === slotId);
+            selectSlot(slotObj);
+          });
         });
-      });
+
+        // Check if any slot is near saturation, suggest low-load alternatives
+        loadAlternativeCenters();
+      }
+
+      async function loadAlternativeCenters() {
+        if (!window.KisanThroughput || !altContainer || !altList) return;
+
+        const alts = await window.KisanThroughput.fetchAlternativeCenters(center.id, selectedCommodity);
+        if (alts && alts.length > 0) {
+          altContainer.classList.remove('hidden');
+          altList.innerHTML = alts.map(a => `
+            <div class="p-3 bg-white rounded-lg border border-amber-200 flex items-center justify-between text-xs">
+              <div>
+                <div class="font-bold text-slate-800">${a.name}</div>
+                <div class="text-[11px] text-amber-800 mt-0.5">${a.recommendationReason}</div>
+              </div>
+              <a href="booking.html?centerId=${a.centerId}" class="px-2.5 py-1.5 rounded-md bg-[#15803d] hover:bg-emerald-700 text-white font-bold text-[11px] shrink-0 ml-2 shadow-2xs">
+                यहाँ बुक करें &rarr;
+              </a>
+            </div>
+          `).join('');
+        }
+      }
 
       function selectSlot(slotObj) {
-        if (!slotObj) return;
+        if (!slotObj || slotObj.isLocked) return;
         selectedSlot = slotObj;
         slotBadge.textContent = `चयनित: ${slotObj.timeRange}`;
         summarySlot.textContent = slotObj.timeRange;
@@ -534,8 +670,8 @@
         document.querySelectorAll('.slot-btn').forEach(btn => {
           const isCurrent = btn.getAttribute('data-slot-id') === slotObj.id;
           btn.classList.toggle('border-emerald-600', isCurrent);
-          btn.classList.toggle('bg-emerald-50', isCurrent);
-          btn.classList.toggle('ring-1', isCurrent);
+          btn.classList.toggle('bg-emerald-50/50', isCurrent);
+          btn.classList.toggle('ring-2', isCurrent);
           btn.classList.toggle('ring-emerald-600', isCurrent);
           btn.classList.toggle('border-slate-200', !isCurrent);
           btn.classList.toggle('bg-white', !isCurrent);
@@ -544,14 +680,17 @@
         });
       }
 
-      // 8. Handle Booking Submission
+      // Initial render of dynamic slots
+      renderThroughputSlots();
+
+      // 8. Handle Booking Submission & Signed Offline Pass Creation
       const confirmBtn = document.getElementById('confirm-booking-btn');
 
-      confirmBtn.addEventListener('click', () => {
-        // SECONDARY SAFETY CHECK: Re-verify center is currently accepting bookings
+      confirmBtn.addEventListener('click', async () => {
+        // SECONDARY SAFETY CHECK
         if (!window.FarmerPortal.isCenterAcceptingBookings(center.id)) {
           const avail = window.FarmerPortal.getCenterAvailability(center.id);
-          validationMessage.textContent = `बुकिंग असफल: यह केंद्र वर्तमान में नई बुकिंग स्वीकार नहीं कर रहा है (${avail.reason || avail.labelEnglish})। कृपया दूसरा केंद्र चुनें। (Booking unavailable at this center)`;
+          validationMessage.textContent = `बुकिंग असफल: यह केंद्र वर्तमान में नई बुकिंग स्वीकार नहीं कर रहा है (${avail.reason || avail.labelEnglish})। कृपया दूसरा केंद्र चुनें।`;
           validationWarning.classList.remove('hidden');
           validationWarning.scrollIntoView({ behavior: 'smooth', block: 'center' });
           return;
@@ -590,16 +729,49 @@
           bookingDateIso: selectedDate.dateIso,
           timeSlot: selectedSlot.timeRange,
           status: "confirmed",
+          currentStage: "BOOKED",
           createdAt: new Date().toISOString(),
           tokenStatus: "generated"
         };
+
+        // 9. Generate Cryptographic Anti-Hoarding QR Payload
+        let signedPayload = null;
+        if (window.KisanQRSecurity) {
+          signedPayload = window.KisanQRSecurity.createSignedPayload(bookingData);
+          bookingData.digitalSig = signedPayload.digitalSig;
+          bookingData.timeWindow = signedPayload.timeWindow;
+          bookingData.signedPayload = signedPayload;
+        }
+
+        // 10. Cache in Offline-Resilient Vault (IndexedDB + LocalStorage)
+        if (window.KisanOfflineStorage && signedPayload) {
+          await window.KisanOfflineStorage.savePass(signedPayload);
+        }
+
+        // Try posting to FastAPI backend asynchronously
+        try {
+          if (window.KisanAPI && window.KisanAPI.createBooking) {
+            await window.KisanAPI.createBooking({
+              center_id: center.id,
+              farmer_name: farmerDisplayName,
+              farmer_phone: user.phone || "+91 98765 43210",
+              commodity: selectedCommodity,
+              booking_date: selectedDate.displayLabel,
+              time_slot: selectedSlot.timeRange,
+              quantity_qtl: 40.0,
+              vehicle_number: "HR-05-AB-1234"
+            });
+          }
+        } catch (err) {
+          console.warn("Backend sync notice (offline mode resilient):", err.message);
+        }
 
         // Save to active booking & history
         const saved = window.FarmerPortal.saveBooking(bookingData);
         if (saved) {
           window.location.href = "booking-confirmation.html";
         } else {
-          validationMessage.textContent = "बुकिंग सहेजने में त्रुटि हुई या केंद्र उपलब्ध नहीं है। कृपया पुनः प्रयास करें। (Error saving booking or center unavailable)";
+          validationMessage.textContent = "बुकिंग सहेजने में त्रुटि हुई। कृपया पुनः प्रयास करें।";
           validationWarning.classList.remove('hidden');
         }
       });

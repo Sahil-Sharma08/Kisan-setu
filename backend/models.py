@@ -42,6 +42,9 @@ class Center(Base):
     current_queue_vehicles = Column(Integer, default=0)
     estimated_wait_minutes = Column(Integer, default=0)
     load_status = Column(String, default="low")  # 'low', 'medium', 'high'
+    active_weighbridges = Column(Integer, default=2)
+    avg_weighing_rate_per_hr = Column(Integer, default=10)
+    buffer_adjustment = Column(Integer, default=-2)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 class Commodity(Base):
@@ -77,6 +80,22 @@ class Booking(Base):
     status = Column(String, default="CONFIRMED")                # 'CONFIRMED', 'ARRIVED', 'CHECKED_IN', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED'
     arrival_status = Column(String, default="pending")          # 'pending', 'arrived', 'checked_in'
     queue_position = Column(Integer, default=0)
+
+    # State-Machine & Anti-Hoarding Fields
+    current_stage = Column(String, default="BOOKED")            # 'BOOKED', 'GATE_SCANNED', 'ASSAY_TESTING', 'WEIGHBRIDGE_IN', 'WEIGHBRIDGE_OUT', 'DBT_DISPATCHED', 'STANDBY_OVERDUE', 'REJECTED_QUALITY', 'CANCELLED'
+    arrival_window_start = Column(DateTime, nullable=True)
+    arrival_window_end = Column(DateTime, nullable=True)
+    digital_sig = Column(String, nullable=True)
+    assigned_bay = Column(String, nullable=True)
+    assigned_weighbridge = Column(String, nullable=True)
+    gross_weight = Column(Float, default=0.0)
+    tare_weight = Column(Float, default=0.0)
+    net_weight = Column(Float, default=0.0)
+    assay_moisture = Column(Float, nullable=True)
+    assay_quality_grade = Column(String, nullable=True)
+    dbt_ref_no = Column(String, nullable=True)
+    dbt_status = Column(String, default="PENDING")
+    stage_history = Column(Text, default="[]")                  # JSON array of stage transitions with timestamps
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 class QueueEntry(Base):
@@ -95,6 +114,16 @@ class QueueEntry(Base):
     estimated_wait_minutes = Column(Integer, default=15)
     arrival_status = Column(String, default="checked_in")
     status = Column(String, default="कतार में प्रतीक्षा (Waiting in Queue)")
+
+    # State-Machine Sync
+    current_stage = Column(String, default="BOOKED")
+    assigned_bay = Column(String, nullable=True)
+    assigned_weighbridge = Column(String, nullable=True)
+    gross_weight = Column(Float, default=0.0)
+    tare_weight = Column(Float, default=0.0)
+    net_weight = Column(Float, default=0.0)
+    assay_moisture = Column(Float, nullable=True)
+    dbt_status = Column(String, default="PENDING")
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
 class ProcurementRecord(Base):
@@ -173,3 +202,20 @@ class SoilTestRecord(Base):
     advisory_notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     tested_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+class CircuitBreakerEvent(Base):
+    __tablename__ = "circuit_breaker_events"
+
+    id = Column(String, primary_key=True, index=True)          # e.g. CB-2026-001
+    center_id = Column(String, ForeignKey("centers.id"), index=True)
+    center_name = Column(String, nullable=False)
+    is_halted = Column(Boolean, default=True)
+    reason = Column(String, nullable=False)                    # 'RAIN', 'MACHINE_BREAKDOWN', 'GODOWN_SATURATED', 'OTHER'
+    reason_label = Column(String, nullable=False)              # e.g. 'अचानक भारी बारिश (Sudden Heavy Rain)'
+    affected_slots = Column(Text, default="[]")                # JSON array of slot strings
+    defer_hours = Column(Integer, default=2)
+    sms_count_sent = Column(Integer, default=0)
+    operator_notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    resolved_at = Column(DateTime, nullable=True)
+

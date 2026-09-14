@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="hi" class="h-full bg-slate-950">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mandi Yard Billboard Screen | लाइव यार्ड डिस्प्ले — KisanSetu</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Core Design System -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    @keyframes subtle-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.88; transform: scale(1.02); }
+    }
+    .callout-pulse {
+      animation: subtle-pulse 2.2s infinite ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-white min-h-screen flex flex-col justify-between overflow-x-hidden select-none antialiased">
+
+  <!-- Top Billboard Header Bar -->
+  <header class="bg-slate-900/90 border-b border-slate-800 px-6 py-4 backdrop-blur-md sticky top-0 z-50">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Mandi Identity -->
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white flex items-center justify-center font-black text-2xl shadow-lg shadow-emerald-900/40">
+          K
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl sm:text-2xl font-black tracking-tight text-white uppercase" id="mandi-title">
+              Karnal Central Procurement Yard
+            </span>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase tracking-widest animate-pulse">
+              LIVE YARD
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 font-medium tracking-wide">
+            सार्वजनिक मंडी यार्ड डिस्प्ले स्क्रीन • खाद्य एवं सार्वजनिक वितरण विभाग (SIH26032)
+          </p>
+        </div>
+      </div>
+
+      <!-- Real-Time Clock & Controls -->
+      <div class="flex items-center gap-4">
+        <div class="text-right">
+          <div class="text-2xl sm:text-3xl font-black font-mono-num text-emerald-400 tracking-wider" id="live-clock">
+            12:00:00 PM
+          </div>
+          <div class="text-[11px] text-slate-400 font-bold uppercase tracking-widest" id="live-date">
+            MONDAY, 14 SEP 2026
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 border-l border-slate-800 pl-4">
+          <!-- Audio Callout Trigger -->
+          <button type="button" id="audio-toggle-btn" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5" title="Audio Chime Announcement">
+            <span id="audio-icon">🔔</span>
+            <span class="hidden sm:inline">Chime</span>
+          </button>
+          <!-- Fullscreen Toggle -->
+          <button type="button" onclick="document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen()" class="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all" title="Toggle Fullscreen">
+            ⛶
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Emergency Halt Alert Banner (Hidden by default, shown if Circuit Breaker active) -->
+    <div id="mandi-alert-banner" class="hidden mt-3 p-3 rounded-xl bg-rose-950/80 border-2 border-rose-500 text-rose-200 text-sm font-bold flex items-center justify-between shadow-lg">
+      <div class="flex items-center gap-2.5">
+        <span class="text-xl animate-bounce">⚠️</span>
+        <span id="mandi-alert-text">चेतावनी: भारी वर्षा के कारण आगामी स्लॉट स्थगित हैं। टोकन प्राथमिकता सुरक्षित है।</span>
+      </div>
+      <span class="px-2 py-0.5 rounded bg-rose-500 text-white text-xs font-mono font-bold uppercase">HALTED</span>
+    </div>
+  </header>
+
+  <!-- Main Billboard 4-Quadrant Split Screen -->
+  <main class="flex-1 p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT COLUMN (7 Cols): Currently Weighing & Next in Queue -->
+    <div class="lg:col-span-7 flex flex-col gap-6">
+
+      <!-- SECTION 1: Currently in Weighing (Lanes 1 & 2) -->
+      <div class="bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl flex-1 flex flex-col justify-between">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-ping"></div>
+            <h2 class="text-lg sm:text-xl font-black uppercase tracking-wider text-emerald-400">
+              इलेक्ट्रॉनिक वेईब्रिज पर वर्तमान वाहन • Currently in Weighing
+            </h2>
+          </div>
+          <span class="text-xs font-mono text-slate-400">ACTIVE LANES: 2/2</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1" id="weighing-lanes-container">
+          <!-- Lane 1 Gross -->
+          <div class="bg-slate-950 border border-emerald-900/60 rounded-xl p-4 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 px-3 py-1 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-wider rounded-bl-lg">
+              LANE #1 • GROSS IN
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">टोकन क्रमांक (Token ID)</span>
+              <div class="text-3xl font-black font-mono-num text-white mt-1 tracking-wider" id="wb-1-token">
+                KS-TKN-1002
+              </div>
+              <div class="text-lg font-bold text-emerald-300 mt-1 truncate" id="wb-1-farmer">
+                बलविंदर सिंह (Balwinder Singh)
+              </div>
+              <div class="text-xs text-slate-400 font-mono mt-0.5" id="wb-1-meta">
+                HR-05-BC-8921 • Wheat (Grade A)
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-900 flex items-end justify-between">
+              <div>
+                <span class="text-[10px] text-slate-500 uppercase font-bold">स्थिति (Status)</span>
+                <div class="text-xs font-bold text-emerald-400 flex items-center gap-1.5 mt-0.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  लोड भार दर्ज हो रहा है
+                </div>
+              </div>
+              <div class="text-right font-mono-num font-black text-2xl text-white">
+                <span id="wb-1-weight">45.80</span> <span class="text-xs font-normal text-slate-400">MT</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lane 2 Net/Tare -->
+          <div class="bg-slate-950 border border-teal-900/60 rounded-xl p-4 flex flex-col justify-between relative overflow-hidden">
+            <div class="absolute top-0 right-0 px-3 py-1 bg-teal-600 text-white text-[10px] font-black uppercase tracking-wider rounded-bl-lg">
+              LANE #2 • TARE OUT
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">टोकन क्रमांक (Token ID)</span>
+              <div class="text-3xl font-black font-mono-num text-white mt-1 tracking-wider" id="wb-2-token">
+                KS-TKN-1004
+              </div>
+              <div class="text-lg font-bold text-teal-300 mt-1 truncate" id="wb-2-farmer">
+                राजिंदर कुमार (Rajinder Kumar)
+              </div>
+              <div class="text-xs text-slate-400 font-mono mt-0.5" id="wb-2-meta">
+                HR-05-PQ-4412 • Paddy (PR-126)
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-900 flex items-end justify-between">
+              <div>
+                <span class="text-[10px] text-slate-500 uppercase font-bold">स्थिति (Status)</span>
+                <div class="text-xs font-bold text-teal-400 flex items-center gap-1.5 mt-0.5">
+                  <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
+                  खाली वजन दर्ज • शुद्ध गणना
+                </div>
+              </div>
+              <div class="text-right font-mono-num font-black text-2xl text-white">
+                <span id="wb-2-weight">14.20</span> <span class="text-xs font-normal text-slate-400">MT</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Next in Queue / Immediate Call-Up -->
+      <div class="bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl flex-1">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">📢</span>
+            <div>
+              <h2 class="text-lg sm:text-xl font-black uppercase tracking-wider text-amber-400">
+                आगामी वाहन बुलावा • Next In Queue (Immediate Call)
+              </h2>
+              <p class="text-xs text-slate-400">कृपया वाहन चालक ट्रॉली लेकर निर्धारित गेट पर उपस्थित हों</p>
+            </div>
+          </div>
+          <span class="text-xs font-bold text-amber-400 px-3 py-1 rounded bg-amber-500/10 border border-amber-500/30">
+            AUTO-CALLING
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5" id="next-queue-container">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN (5 Cols): Assay Bays & Mandi Throughput Metrics -->
+    <div class="lg:col-span-5 flex flex-col gap-6">
+
+      <!-- SECTION 3: Assay Lab Assignments -->
+      <div class="bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">🧪</span>
+            <h2 class="text-lg font-black uppercase tracking-wider text-purple-400">
+              गुणवत्ता परीक्षण बे • Assay Lab Bays
+            </h2>
+          </div>
+          <span class="text-xs font-mono text-slate-400">FCI FAQ NORMS</span>
+        </div>
+
+        <div class="space-y-3" id="assay-bays-container">
+          <!-- Bay entries populated dynamically -->
+        </div>
+      </div>
+
+      <!-- SECTION 4: Mandi Yard Live Latency & Tonnage Gauge -->
+      <div class="bg-slate-900 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl flex-1 flex flex-col justify-between">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">📊</span>
+            <h2 class="text-lg font-black uppercase tracking-wider text-cyan-400">
+              यार्ड थ्रूपुट व विलंबता • Yard Throughput
+            </h2>
+          </div>
+          <span class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">
+            OPERATIONAL
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-center my-auto">
+          <!-- Avg Wait Time -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+              औसत प्रतीक्षा (Avg Wait Time)
+            </span>
+            <div class="text-4xl sm:text-5xl font-black font-mono-num text-emerald-400 my-1" id="stat-wait-time">
+              18
+            </div>
+            <span class="text-xs text-slate-400 font-semibold">मिनट (Minutes)</span>
+          </div>
+
+          <!-- Total MT Procured Today -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+              आज कुल खरीद (Today's MT)
+            </span>
+            <div class="text-4xl sm:text-5xl font-black font-mono-num text-cyan-400 my-1" id="stat-procured-mt">
+              312.5
+            </div>
+            <span class="text-xs text-slate-400 font-semibold">मीट्रिक टन (MT)</span>
+          </div>
+
+          <!-- Active Vehicles in Yard -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+              यार्ड में उपस्थित वाहन (In Yard)
+            </span>
+            <div class="text-3xl sm:text-4xl font-black font-mono-num text-amber-400 my-1" id="stat-active-vehicles">
+              14
+            </div>
+            <span class="text-xs text-slate-400 font-semibold">ट्रैक्टर-ट्रॉली (Trolleys)</span>
+          </div>
+
+          <!-- Daily Capacity Target -->
+          <div class="bg-slate-950 border border-slate-800 rounded-xl p-4">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+              दैनिक लक्ष्य (Daily Target)
+            </span>
+            <div class="text-3xl sm:text-4xl font-black font-mono-num text-purple-400 my-1" id="stat-target-mt">
+              500
+            </div>
+            <span class="text-xs text-slate-400 font-semibold">MT / दिन</span>
+          </div>
+        </div>
+
+        <!-- Footer Ticker -->
+        <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>ऑटो-सिंक सक्रिय • Zero-Reload Event Bus</span>
+          </div>
+          <div class="font-mono text-[11px] text-slate-500">
+            KisanSetu Billboard Engine v2.0
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Audio Chime Generator via Web Audio API -->
+  <script>
+    function playChime() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.8);
+      } catch (e) {
+        console.warn("Audio Context error:", e);
+      }
+    }
+  </script>
+
+  <!-- Scripts -->
+  <script src="js/event-bus.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Clock Engine
+      function updateClock() {
+        const now = new Date();
+        document.getElementById("live-clock").textContent = now.toLocaleTimeString('en-US', { hour12: true });
+        document.getElementById("live-date").textContent = now.toLocaleDateString('en-GB', {
+          weekday: 'long', day: '2-digit', month: 'short', year: 'numeric'
+        }).toUpperCase();
+      }
+      setInterval(updateClock, 1000);
+      updateClock();
+
+      // 2. Audio Chime Button
+      let chimeEnabled = true;
+      const audioBtn = document.getElementById("audio-toggle-btn");
+      audioBtn.addEventListener("click", () => {
+        chimeEnabled = !chimeEnabled;
+        audioBtn.classList.toggle("bg-emerald-900/60", chimeEnabled);
+        audioBtn.classList.toggle("text-emerald-300", chimeEnabled);
+        if (chimeEnabled) playChime();
+      });
+
+      const centerId = "CTR-KARNAL-01";
+
+      // 3. Fetch Billboard Data
+      async function fetchBillboardData() {
+        try {
+          const res = await fetch(`/api/v1/queue/${encodeURIComponent(centerId)}/yard-screen`);
+          if (!res.ok) throw new Error("HTTP error");
+          const json = await res.json();
+          if (json.success) {
+            renderBillboard(json);
+          }
+        } catch (err) {
+          console.warn("YardScreen fallback polling:", err.message);
+        }
+      }
+
+      function renderBillboard(data) {
+        if (!data) return;
+
+        // Mandi Title
+        if (data.centerName) {
+          document.getElementById("mandi-title").textContent = data.centerName;
+        }
+
+        // Metrics
+        if (data.metrics) {
+          document.getElementById("stat-wait-time").textContent = data.metrics.averageWaitMinutes || 18;
+          document.getElementById("stat-procured-mt").textContent = data.metrics.todayProcuredMT || 312.5;
+          document.getElementById("stat-active-vehicles").textContent = data.metrics.activeVehiclesInYard || 14;
+          document.getElementById("stat-target-mt").textContent = data.metrics.dailyCapacityMT || 500;
+        }
+
+        // Currently Weighing Lanes
+        if (data.currentlyWeighing && data.currentlyWeighing.length >= 2) {
+          const l1 = data.currentlyWeighing[0];
+          document.getElementById("wb-1-token").textContent = l1.tokenId;
+          document.getElementById("wb-1-farmer").textContent = l1.farmerName;
+          document.getElementById("wb-1-meta").textContent = `${l1.vehicleNumber || 'HR-05-TR-1002'} • ${l1.commodity || 'Wheat'}`;
+          document.getElementById("wb-1-weight").textContent = l1.grossWeight ? l1.grossWeight.toFixed(2) : "45.80";
+
+          const l2 = data.currentlyWeighing[1];
+          document.getElementById("wb-2-token").textContent = l2.tokenId;
+          document.getElementById("wb-2-farmer").textContent = l2.farmerName;
+          document.getElementById("wb-2-meta").textContent = `${l2.vehicleNumber || 'HR-05-TR-1004'} • ${l2.commodity || 'Paddy'}`;
+          document.getElementById("wb-2-weight").textContent = l2.grossWeight ? l2.grossWeight.toFixed(2) : "14.20";
+        }
+
+        // Next in Queue
+        const nextContainer = document.getElementById("next-queue-container");
+        if (data.nextInQueue && data.nextInQueue.length > 0) {
+          nextContainer.innerHTML = data.nextInQueue.map((item, idx) => {
+            const isFirst = idx === 0;
+            return `
+              <div class="p-3.5 rounded-xl border ${isFirst ? 'bg-amber-950/40 border-amber-500/80 ring-2 ring-amber-500/40 callout-pulse' : 'bg-slate-950 border-slate-800'} flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-2 py-0.5 rounded ${isFirst ? 'bg-amber-500 text-black font-black' : 'bg-slate-800 text-slate-300'}">
+                      #${item.queuePos}
+                    </span>
+                    <span class="text-sm font-black font-mono-num text-white">${item.tokenId}</span>
+                  </div>
+                  <div class="text-sm font-bold text-slate-200 mt-1 truncate max-w-[170px]">${item.farmerName}</div>
+                  <div class="text-[11px] text-slate-400 font-mono">${item.vehicleNumber} • ${item.commodity}</div>
+                </div>
+                <div class="text-right">
+                  <span class="px-2.5 py-1 rounded text-xs font-black ${isFirst ? 'bg-amber-400 text-slate-950 animate-bounce' : 'bg-slate-800 text-slate-300'} inline-block">
+                    ${item.callGate}
+                  </span>
+                  <div class="text-[10px] text-slate-400 mt-1">~${item.estWaitMins} min</div>
+                </div>
+              </div>
+            `;
+          }).join("");
+        }
+
+        // Assay Bays
+        const assayContainer = document.getElementById("assay-bays-container");
+        if (data.assayBays && data.assayBays.length > 0) {
+          assayContainer.innerHTML = data.assayBays.map(bay => {
+            const isCleared = bay.status.includes("CLEARED");
+            const isAlert = bay.status.includes("ALERT");
+            const borderColor = isAlert ? 'border-rose-700/60 bg-rose-950/20' : (isCleared ? 'border-emerald-800/60 bg-emerald-950/20' : 'border-purple-800/60 bg-purple-950/20');
+            const textColor = isAlert ? 'text-rose-400' : (isCleared ? 'text-emerald-400' : 'text-purple-400');
+            return `
+              <div class="p-3 rounded-xl border ${borderColor} flex items-center justify-between">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold ${textColor}">${bay.bay}</span>
+                    <span class="text-xs font-mono text-slate-400">• ${bay.tokenId}</span>
+                  </div>
+                  <div class="text-xs font-bold text-slate-200 mt-0.5">${bay.farmerName}</div>
+                </div>
+                <div class="text-right">
+                  <span class="text-base font-black font-mono-num text-white">${bay.moisture}</span>
+                  <div class="text-[10px] font-bold ${textColor}">${bay.status}</div>
+                </div>
+              </div>
+            `;
+          }).join("");
+        }
+      }
+
+      // 4. Initial Fetch + Polling
+      fetchBillboardData();
+      setInterval(fetchBillboardData, 6000);
+
+      // 5. Connect Real-time Event Bus
+      if (window.KisanEventBus) {
+        window.KisanEventBus.connectWebSocket(centerId);
+
+        window.KisanEventBus.subscribe("STAGE_TRANSITION", (event) => {
+          fetchBillboardData();
+          if (chimeEnabled) playChime();
+        });
+
+        window.KisanEventBus.subscribe("GATE_VERIFIED", (event) => {
+          fetchBillboardData();
+          if (chimeEnabled) playChime();
+        });
+
+        window.KisanEventBus.subscribe("QUEUE_ADVANCED", (event) => {
+          fetchBillboardData();
+          if (chimeEnabled) playChime();
+        });
+
+        window.KisanEventBus.subscribe("CIRCUIT_BREAKER_TRIGGERED", (alert) => {
+          const banner = document.getElementById("mandi-alert-banner");
+          document.getElementById("mandi-alert-text").textContent = `अलर्ट: ${alert.reasonLabel || 'आपातकालीन रोक'} • आगामी स्लॉट स्थगित हैं।`;
+          banner.classList.remove("hidden");
+          if (chimeEnabled) playChime();
+        });
+
+        window.KisanEventBus.subscribe("CIRCUIT_BREAKER_RESET", () => {
+          document.getElementById("mandi-alert-banner").classList.add("hidden");
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>
