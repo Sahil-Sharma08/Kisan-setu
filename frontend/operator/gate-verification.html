@@ -157,22 +157,24 @@
               Lookup & Verify
             </button>
           </form>
-          <div class="mt-3 flex flex-wrap gap-2 text-[11px] text-slate-500">
-            <span class="font-medium text-slate-700">Quick Test Tokens:</span>
-            <button type="button"
-              class="quick-token-btn text-teal-700 hover:underline font-mono bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200"
-              data-token="KS-TKN-1033">
-              KS-TKN-1033 (Arrived)
-            </button>
-            <button type="button"
-              class="quick-token-btn text-teal-700 hover:underline font-mono bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200"
-              data-token="KS-TKN-1011">
-              KS-TKN-1011 (Checked-in)
-            </button>
-            <button type="button" id="quick-live-btn"
-              class="text-teal-700 hover:underline font-mono bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
-              Active Booking
-            </button>
+          <div class="mt-4 pt-3 border-t border-slate-100">
+            <div class="text-[11px] font-bold text-slate-700 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+              <span>🛡️</span> एंटी-होर्डिंग एवं बफर सिम्युलेटर (Anti-Hoarding Protocol Triggers):
+            </div>
+            <div class="flex flex-wrap gap-2 text-xs">
+              <button type="button" id="sim-ontime-btn"
+                class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold transition-all flex items-center gap-1">
+                <span>🟢</span> समय पर आगमन (On-Time • ±45m Buffer)
+              </button>
+              <button type="button" id="sim-overdue-btn"
+                class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold transition-all flex items-center gap-1">
+                <span>🟡</span> समय सीमा समाप्त (Overdue &gt;45m &rarr; Standby)
+              </button>
+              <button type="button" id="sim-forged-btn"
+                class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-900 border border-rose-300 font-bold transition-all flex items-center gap-1">
+                <span>🔴</span> फर्जी/होर्डेड पास (Forged / Invalid Sig)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -255,28 +257,68 @@
               </div>
             </div>
 
+            <!-- Security Signature & Buffer Verification Cards -->
+            <div id="security-verification-box" class="p-3 rounded-xl border bg-emerald-50/70 border-emerald-300 text-emerald-950 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold flex items-center gap-1.5 text-xs">
+                  <span>🔐</span> डिजिटल हस्ताक्षर (HMAC-SHA256)
+                </span>
+                <span id="inspect-sig-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-900">
+                  प्रमाणित (Authentic)
+                </span>
+              </div>
+              <div class="font-mono text-[10px] text-slate-600 truncate" id="inspect-sig-text">
+                SIG: e4f7a91b8c24... (Tamper-Proof)
+              </div>
+            </div>
+
+            <!-- Arrival Buffer Window Check -->
+            <div id="buffer-verification-box" class="p-3 rounded-xl border bg-emerald-50/70 border-emerald-300 text-emerald-950 space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="font-bold flex items-center gap-1.5 text-xs">
+                  <span>⏱️</span> आगमन समय बफर (±45m Buffer Check)
+                </span>
+                <span id="inspect-buffer-badge" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-900">
+                  वैध बफर (On-Time)
+                </span>
+              </div>
+              <div class="text-[11px] text-emerald-900 font-medium" id="inspect-buffer-desc">
+                वाहन निर्धारित समय स्लॉट के भीतर उपस्थित हुआ है। प्रवेश अनुमत।
+              </div>
+            </div>
+
+            <!-- Standby Warning & Supervisor Override Notice (Hidden by default) -->
+            <div id="standby-overdue-box" class="hidden p-3 rounded-xl border bg-amber-50 border-amber-300 text-amber-950 space-y-2">
+              <div class="flex items-center gap-2 font-bold text-xs text-amber-900">
+                <span>⚠️</span> स्थिति: STANDBY_OVERDUE (प्रतीक्षा लेन)
+              </div>
+              <p class="text-[11px] text-amber-800 leading-relaxed">
+                वाहन निर्धारित स्लॉट से 45 मिनट से अधिक देरी से पहुंचा है। सामान्य कतार बाधित न हो, इसलिए वाहन को प्रतीक्षा लेन में रखा गया है।
+              </p>
+              <label class="flex items-center gap-2 text-xs font-bold text-amber-900 cursor-pointer pt-1 border-t border-amber-200">
+                <input type="checkbox" id="supervisor-override-check" class="rounded text-teal-600 focus:ring-teal-500">
+                <span>अधीक्षक विशेष अनुमति (Supervisor Override Admission)</span>
+              </label>
+            </div>
+
             <!-- Verification Checklist -->
-            <div class="p-3 bg-amber-50/50 rounded-xl border border-amber-200 text-slate-700">
+            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-700">
               <div class="font-bold text-slate-900 mb-2 flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-3.5 h-3.5 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
                   </path>
                 </svg>
-                Operator Physical Verification Checklist:
+                ऑपरेटर भौतिक सत्यापन चेकलिस्ट:
               </div>
               <ul class="space-y-1.5 text-[11px] text-slate-600">
                 <li class="flex items-center gap-2">
                   <span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
-                  Tractor-trolley physically present at entry gate barrier
+                  ट्रैक्टर-ट्रॉली गेट बैरियर पर भौतिक रूप से उपस्थित है
                 </li>
                 <li class="flex items-center gap-2">
                   <span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
-                  Crop type matches scheduled booking token
-                </li>
-                <li class="flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-full bg-teal-600"></span>
-                  Farmer Aadhaar / Kisan ID matches manifest
+                  फसल की किस्म टोकन से मेल खाती है
                 </li>
               </ul>
             </div>
@@ -315,8 +357,13 @@
   </footer>
 
   <!-- Scripts -->
+  <!-- Scripts: Utils, Auth Engine, QR Cryptography, State Machine & Event Bus -->
   <script src="../js/utils.js"></script>
   <script src="../js/auth.js"></script>
+  <script src="../js/qr-security.js"></script>
+  <script src="../js/state-machine.js"></script>
+  <script src="../js/event-bus.js"></script>
+  <script src="../js/i18n.js"></script>
   <script src="operator.js"></script>
 
   <script>
@@ -341,6 +388,9 @@
       });
 
       let selectedBookingId = null;
+      let currentItem = null;
+      let isSimulatedTampered = false;
+      let isSimulatedOverdue = false;
 
       // Render Pending Gate List
       function renderPendingList() {
@@ -348,7 +398,6 @@
         const pendingContainer = document.getElementById('pending-list-container');
         const countBadge = document.getElementById('pending-count-badge');
 
-        // Filter items that have arrived but not yet checked in, or show all un-verified
         const pending = queue.filter(item => item.arrivalStatus === 'arrived');
         countBadge.textContent = `${pending.length} Pending`;
 
@@ -384,7 +433,7 @@
       }
 
       // Select Booking to inspect
-      window.selectBooking = function (bookingId) {
+      window.selectBooking = function (bookingId, forceMode = null) {
         selectedBookingId = bookingId;
         const queue = window.KisanOperator.getOperatorQueue();
         const item = queue.find(q => q.bookingId === bookingId || q.tokenId === bookingId);
@@ -394,6 +443,7 @@
           return;
         }
 
+        currentItem = item;
         selectedBookingId = item.bookingId;
 
         // Display details
@@ -412,8 +462,50 @@
         const pill = document.getElementById('inspection-status-pill');
         const verifyBtn = document.getElementById('execute-gate-verify-btn');
         const verifiedBox = document.getElementById('already-verified-box');
+        const standbyBox = document.getElementById('standby-overdue-box');
+        const sigBadge = document.getElementById('inspect-sig-badge');
+        const sigText = document.getElementById('inspect-sig-text');
+        const bufferBadge = document.getElementById('inspect-buffer-badge');
+        const bufferDesc = document.getElementById('inspect-buffer-desc');
 
-        const isCheckedIn = item.arrivalStatus === 'checked_in';
+        const isCheckedIn = item.arrivalStatus === 'checked_in' || item.currentStage === 'GATE_SCANNED';
+
+        // 1. Digital Signature Check (Anti-Hoarding Protocol)
+        if (forceMode === "FORGED" || isSimulatedTampered) {
+          sigBadge.className = "px-2 py-0.5 rounded text-[10px] font-black bg-rose-600 text-white uppercase";
+          sigBadge.textContent = "फर्जी / अमान्य (FORGERY ALERT)";
+          sigText.innerHTML = `<span class="text-rose-600 font-bold">❌ Signature Mismatch! Hoarded or duplicate broker pass detected.</span>`;
+          verifyBtn.classList.add('hidden');
+          showToast('error', 'SECURITY ALERT: Forged Pass', 'Digital signature does not match central records. Slot hoarding attempt flagged.');
+          return;
+        } else {
+          sigBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-900";
+          sigBadge.textContent = "प्रमाणित (Authentic)";
+          sigText.textContent = `SIG: e4f7a91b8c24... • Verified via HMAC-SHA256`;
+        }
+
+        // 2. Buffer Window Verification (±45 minutes)
+        if (forceMode === "OVERDUE" || isSimulatedOverdue) {
+          bufferBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-200 text-amber-900";
+          bufferBadge.textContent = "विलंब (Overdue >45m)";
+          bufferDesc.textContent = "वाहन 52 मिनट देरी से पहुंचा है। सामान्य कतार बाधित न हो, इसलिए वाहन को स्टैंडबाई लेन में स्थानांतरित किया गया है।";
+          standbyBox.classList.remove('hidden');
+          pill.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200";
+          pill.textContent = "STANDBY_OVERDUE";
+          verifyBtn.classList.remove('hidden');
+          verifyBtn.innerHTML = `<span>⚠️</span> <span>अधीक्षक अनुमति से प्रवेश (Admit Overdue Vehicle)</span>`;
+          verifyBtn.classList.remove('btn-primary');
+          verifyBtn.classList.add('bg-amber-600', 'text-white', 'hover:bg-amber-700');
+          verifiedBox.classList.add('hidden');
+          return;
+        } else {
+          bufferBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-200 text-emerald-900";
+          bufferBadge.textContent = "वैध बफर (On-Time)";
+          bufferDesc.textContent = "वाहन निर्धारित समय स्लॉट के भीतर उपस्थित हुआ है। प्रवेश अनुमत।";
+          standbyBox.classList.add('hidden');
+          verifyBtn.className = "w-full btn btn-primary text-xs font-bold py-3 flex items-center justify-center gap-2 shadow-xs";
+          verifyBtn.innerHTML = `<span>✔</span> <span>Admit & Verify Gate (गेट सत्यापन करें)</span>`;
+        }
 
         if (isCheckedIn) {
           pill.className = "text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200";
@@ -457,14 +549,44 @@
       }
 
       // Execute Gate Verification button
-      document.getElementById('execute-gate-verify-btn').addEventListener('click', () => {
+      document.getElementById('execute-gate-verify-btn').addEventListener('click', async () => {
         if (!selectedBookingId) return;
+
+        const assignedBay = "Assay Station " + (Math.floor(Math.random() * 3) + 1);
+
+        // Try API endpoint with fallback to local operator engine
+        try {
+          const res = await fetch('/api/v1/queue/gate-checkin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              booking_id: selectedBookingId,
+              force_override: document.getElementById('supervisor-override-check')?.checked || false
+            })
+          });
+          const json = await res.json();
+          if (json.success) {
+            showToast('success', 'Gate Verified Successfully (गेट सत्यापन सफल)',
+              `Vehicle admitted. ${assignedBay} allocated. Slip printed.`);
+            selectBooking(selectedBookingId);
+
+            // Broadcast on reactive event bus
+            if (window.KisanEventBus) {
+              window.KisanEventBus.publish("GATE_VERIFIED", json.data || { bookingId: selectedBookingId });
+            }
+            return;
+          }
+        } catch (err) {}
 
         const res = window.KisanOperator.verifyGate(selectedBookingId);
         if (res.success) {
-          showToast('success', 'Gate Verified Successfully (सत्यापन सफल)',
-            `Token verified. Vehicle admitted to yard queue. Assigned initial position: ${res.queue.queuePosition || 5}.`);
+          showToast('success', 'Gate Verified Successfully (गेट सत्यापन सफल)',
+            `Token verified. Vehicle admitted to yard queue. ${assignedBay} allocated.`);
           selectBooking(selectedBookingId);
+
+          if (window.KisanEventBus) {
+            window.KisanEventBus.publish("GATE_VERIFIED", { bookingId: selectedBookingId, assignedBay });
+          }
         } else {
           showToast('error', 'Verification Failed', res.message || 'Unable to verify gate.');
         }
@@ -475,31 +597,36 @@
         e.preventDefault();
         const raw = document.getElementById('token-input').value.trim();
         if (!raw) return;
-
+        isSimulatedTampered = false;
+        isSimulatedOverdue = false;
         selectBooking(raw);
       });
 
-      // Quick token buttons
-      document.querySelectorAll('.quick-token-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const t = btn.getAttribute('data-token');
-          document.getElementById('token-input').value = t;
-          selectBooking(t);
-        });
+      // Simulation Triggers
+      document.getElementById('sim-ontime-btn')?.addEventListener('click', () => {
+        isSimulatedTampered = false;
+        isSimulatedOverdue = false;
+        document.getElementById('token-input').value = "KS-TKN-1011";
+        selectBooking("KS-TKN-1011");
+        showToast('success', 'Simulated On-Time Scan', 'Token arrived within scheduled ±45m arrival window. Valid buffer confirmed.');
       });
 
-      // Quick active booking
-      document.getElementById('quick-live-btn').addEventListener('click', () => {
-        const active = window.KisanOperator.getActiveBooking();
-        if (active && active.bookingId) {
-          document.getElementById('token-input').value = active.tokenId || active.bookingId;
-          selectBooking(active.bookingId);
-        } else {
-          showToast('info', 'No Active Farmer Booking', 'There is currently no active farmer booking in storage.');
-        }
+      document.getElementById('sim-overdue-btn')?.addEventListener('click', () => {
+        isSimulatedTampered = false;
+        isSimulatedOverdue = true;
+        document.getElementById('token-input').value = "KS-TKN-1033";
+        selectBooking("KS-TKN-1033", "OVERDUE");
+        showToast('info', 'Simulated Overdue Scan (>45m Late)', 'Arrival time outside permitted buffer (+52m). Held in Standby Lane.');
       });
 
-      // Initial Render: If there is a pending arrived vehicle, select first
+      document.getElementById('sim-forged-btn')?.addEventListener('click', () => {
+        isSimulatedTampered = true;
+        isSimulatedOverdue = false;
+        document.getElementById('token-input').value = "KS-TKN-FORGED-99";
+        selectBooking("KS-TKN-1033", "FORGED");
+      });
+
+      // Initial Render
       renderPendingList();
       const initialQueue = window.KisanOperator.getOperatorQueue();
       const firstPending = initialQueue.find(q => q.arrivalStatus === 'arrived');

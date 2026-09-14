@@ -1,3 +1,4 @@
+import json
 import random
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -5,10 +6,24 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models import Booking, Center, QueueEntry
 from backend.schemas import BookingCreateRequest, BookingResponse, TokenResponse
+from backend.qr_security import create_signed_token_payload, generate_digital_signature
 
 router = APIRouter(tags=["Slot Bookings & Digital Tokens"])
 
 def _format_booking(b: Booking) -> dict:
+    # Build signed QR payload dictionary
+    signed_payload = create_signed_token_payload(
+        token_id=b.token_id,
+        farmer_id=b.farmer_id or "USR-FARMER-01",
+        farmer_name=b.farmer_name,
+        vehicle_no=b.vehicle_number,
+        center_id=b.center_id,
+        commodity=b.commodity,
+        quantity_qtl=b.quantity_qtl,
+        booking_date=b.booking_date,
+        time_slot=b.time_slot
+    )
+    
     return {
         "bookingId": b.id,
         "id": b.id,
@@ -27,7 +42,12 @@ def _format_booking(b: Booking) -> dict:
         "vehicleNumber": b.vehicle_number,
         "status": b.status,
         "arrivalStatus": b.arrival_status,
-        "queuePosition": b.queue_position
+        "queuePosition": b.queue_position,
+        "currentStage": getattr(b, "current_stage", "BOOKED") or "BOOKED",
+        "digitalSig": b.digital_sig or signed_payload.get("digitalSig"),
+        "timeWindow": signed_payload.get("timeWindow"),
+        "signedPayload": signed_payload,
+        "qrPayload": json.dumps(signed_payload)
     }
 
 @router.post("/bookings", status_code=status.HTTP_201_CREATED)
@@ -47,6 +67,18 @@ def create_booking(payload: BookingCreateRequest, db: Session = Depends(get_db))
     active_in_queue = db.query(QueueEntry).filter(QueueEntry.center_id == center.id).count()
     queue_pos = active_in_queue + 1
 
+    signed_payload = create_signed_token_payload(
+        token_id=token_id,
+        farmer_id="USR-FARMER-01",
+        farmer_name=payload.farmer_name or "Demo Farmer",
+        vehicle_no=payload.vehicle_number,
+        center_id=center.id,
+        commodity=payload.commodity,
+        quantity_qtl=payload.quantity_qtl,
+        booking_date=payload.booking_date,
+        time_slot=payload.time_slot
+    )
+
     booking = Booking(
         id=booking_id,
         token_id=token_id,
@@ -63,7 +95,9 @@ def create_booking(payload: BookingCreateRequest, db: Session = Depends(get_db))
         vehicle_number=payload.vehicle_number,
         status="CONFIRMED",
         arrival_status="pending",
-        queue_position=queue_pos
+        queue_position=queue_pos,
+        current_stage="BOOKED",
+        digital_sig=signed_payload.get("digitalSig")
     )
     db.add(booking)
 

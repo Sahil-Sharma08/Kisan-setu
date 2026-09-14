@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mandi Superintendent Command Center | नियंत्रण कक्ष — KisanSetu</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Core Design System -->
+  <link rel="stylesheet" href="../css/style.css">
+
+  <style>
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- Command Center Header -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl">
+    <div class="container mx-auto px-4 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        
+        <!-- Brand & Center Context -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-[#0f766e] text-white flex items-center justify-center font-black text-lg shadow-md shadow-teal-900/40">
+            K
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-base sm:text-lg font-bold text-white tracking-tight">KisanSetu</span>
+              <span class="text-xs text-slate-400">| Superintendent Command Center</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/40 uppercase">
+                CONTROL ROOM
+              </span>
+            </div>
+            <div class="text-xs font-semibold text-teal-400" id="header-facility-name">
+              Karnal Central Procurement Depot • Yard Superintendent Desk
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs & Actions -->
+        <div class="flex items-center gap-3">
+          <a href="../yard-screen.html" target="_blank" class="btn btn-outline btn-sm text-xs font-bold py-1.5 px-3 border-teal-500/60 text-teal-300 hover:bg-teal-950 flex items-center gap-1.5">
+            <span>📺</span> Live Yard Billboard
+          </a>
+          <a href="dashboard.html" class="btn btn-outline btn-sm text-xs font-semibold py-1.5 px-3 text-slate-300 border-slate-700 hover:bg-slate-800">
+            Admin Overview
+          </a>
+          <a href="../operator/queue.html" class="btn btn-outline btn-sm text-xs font-semibold py-1.5 px-3 text-slate-300 border-slate-700 hover:bg-slate-800">
+            Operator Queue
+          </a>
+          <button type="button" id="logout-btn" class="btn btn-outline btn-sm text-xs py-1.5 px-3 text-rose-300 border-rose-900 hover:bg-rose-950">
+            Logout
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="container mx-auto py-6 px-4 flex-1 space-y-6">
+
+    <!-- Active Circuit Breaker Alert Banner (If halted) -->
+    <div id="cb-active-banner" class="hidden p-4 rounded-2xl bg-rose-950/90 border-2 border-rose-500 shadow-2xl flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xl font-black animate-pulse">
+          ⚡
+        </div>
+        <div>
+          <div class="text-base font-black text-white flex items-center gap-2">
+            <span>EMERGENCY CIRCUIT BREAKER ACTIVATED</span>
+            <span class="text-xs bg-rose-600 text-white px-2 py-0.5 rounded font-mono uppercase">HALTED</span>
+          </div>
+          <p class="text-xs text-rose-200 mt-0.5" id="cb-banner-desc">
+            Upcoming intake slots have been suspended. Mass SMS broadcast dispatched to queued farmers.
+          </p>
+        </div>
+      </div>
+      <button type="button" id="cb-banner-resume-btn" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition-all shadow-lg">
+        Resume Normal Operations
+      </button>
+    </div>
+
+    <!-- Top Command Strip: Mandi Tonnage Gauge & Circuit Breaker Trigger -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Tonnage Gauge Radial / Telemetry (8 Cols) -->
+      <div class="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4 border-b border-slate-800 pb-3">
+          <div>
+            <span class="text-xs font-bold text-teal-400 uppercase tracking-wider">Real-Time Intake & Tonnage Gauge</span>
+            <h1 class="text-xl font-black text-white">दैनिक खरीद टन भार मापक (Procurement Tonnage Gauge)</h1>
+          </div>
+          <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">
+            RATE: ~38.4 MT/HR
+          </span>
+        </div>
+
+        <!-- 3-Way Metrics Comparison: Target vs Weighed Inbound vs En-Route -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-center">
+          <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-4">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Target Daily Capacity</span>
+            <div class="text-3xl font-black font-mono-num text-purple-400 mt-1" id="gauge-target-mt">
+              500.0 <span class="text-sm text-slate-500 font-normal">MT</span>
+            </div>
+            <span class="text-[11px] text-slate-500 mt-0.5 block">Approved Depot Allocation</span>
+          </div>
+
+          <div class="bg-slate-950 border border-emerald-900/60 rounded-xl p-4">
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block">Weighed Inbound (Net)</span>
+            <div class="text-3xl font-black font-mono-num text-emerald-300 mt-1" id="gauge-weighed-mt">
+              312.5 <span class="text-sm text-slate-500 font-normal">MT</span>
+            </div>
+            <span class="text-[11px] text-emerald-500/80 mt-0.5 block" id="gauge-intake-pct">62.5% Complete</span>
+          </div>
+
+          <div class="bg-slate-950 border border-amber-900/60 rounded-xl p-4">
+            <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider block">En-Route / Scheduled</span>
+            <div class="text-3xl font-black font-mono-num text-amber-300 mt-1" id="gauge-enroute-mt">
+              145.0 <span class="text-sm text-slate-500 font-normal">MT</span>
+            </div>
+            <span class="text-[11px] text-amber-500/80 mt-0.5 block">Queued Bookings Expected</span>
+          </div>
+        </div>
+
+        <!-- High-contrast Tonnage Progress Bar -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs font-mono font-bold text-slate-300">
+            <span>Cumulative Inbound Progress</span>
+            <span id="gauge-bar-label">312.5 MT / 500.0 MT (62.5%)</span>
+          </div>
+          <div class="w-full h-4 bg-slate-950 rounded-full border border-slate-800 overflow-hidden relative">
+            <div id="gauge-progress-bar" class="h-full bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-400 transition-all duration-700 rounded-full" style="width: 62.5%;"></div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-500 font-mono">
+            <span>0 MT</span>
+            <span>250 MT (50%)</span>
+            <span>500 MT (Saturation Threshold)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Circuit Breaker Trigger Box (4 Cols) -->
+      <div class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+            <h2 class="text-base font-black text-white uppercase tracking-wider">
+              Emergency Circuit Breaker
+            </h2>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed mb-4">
+            Instantly halt incoming traffic and upcoming slots in case of sudden weather changes, machinery breakdown, or godown saturation.
+          </p>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Reason for Halt (कारण)</label>
+              <select id="cb-reason-select" class="w-full bg-slate-950 border border-slate-700 text-xs font-bold rounded-lg p-2.5 text-slate-200 focus:ring-1 focus:ring-rose-500">
+                <option value="RAIN">अचानक भारी बारिश (Sudden Unseasonal Rain)</option>
+                <option value="MACHINE_BREAKDOWN">वेईब्रिज मशीन खराबी (Weighbridge Breakdown)</option>
+                <option value="GODOWN_SATURATED">गोदाम क्षमता पूर्ण (Godown Saturation Limit)</option>
+                <option value="GRID_OUTAGE">विद्युत ग्रिड विफलता (Power Grid Outage)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Deferral Duration (स्थगित अवधि)</label>
+              <select id="cb-defer-select" class="w-full bg-slate-950 border border-slate-700 text-xs font-bold rounded-lg p-2.5 text-slate-200 focus:ring-1 focus:ring-rose-500">
+                <option value="1">1 Hour Deferral (+60 Mins)</option>
+                <option value="2" selected>2 Hours Deferral (+120 Mins)</option>
+                <option value="3">3 Hours Deferral (+180 Mins)</option>
+                <option value="4">Until Next Morning (09:00 AM)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-800 space-y-2">
+          <button type="button" id="trigger-circuit-breaker-btn" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-700 to-rose-600 hover:from-rose-600 hover:to-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-rose-950/50 flex items-center justify-center gap-2">
+            <span>⚠️</span>
+            <span>Halt Upcoming Slots & Send Mass SMS</span>
+          </button>
+          <div class="text-[10px] text-slate-500 text-center font-mono">
+            Simulates automated SMS dispatch to all queued farmers.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Stage Latency Tracker & Bottleneck Detector -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+        <div>
+          <span class="text-xs font-bold text-teal-400 uppercase tracking-wider">End-to-End Turnaround Analytics</span>
+          <h2 class="text-lg font-black text-white">
+            चरण विलंबता एवं रुकावट ट्रैकर (Stage Latency & Bottleneck Detector)
+          </h2>
+        </div>
+        <div id="bottleneck-indicator-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
+          <span>1 Active Bottleneck Detected</span>
+        </div>
+      </div>
+
+      <!-- Stage Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4" id="stages-latency-container">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Highlighted Bottleneck Root Cause Alert Box -->
+      <div id="bottleneck-alert-card" class="p-4 rounded-xl bg-rose-950/40 border border-rose-700/60 flex items-start gap-3">
+        <span class="text-2xl mt-0.5">⚠️</span>
+        <div class="flex-1">
+          <div class="text-xs font-black text-rose-300 uppercase tracking-wider">
+            Critical Bottleneck: Assay Bay #2 Quality Testing
+          </div>
+          <p class="text-xs text-rose-100 mt-1 leading-relaxed">
+            Average turnaround latency elevated to <strong>38.5 mins</strong> (Benchmark: &le; 15 mins).
+            <strong>Recommendation:</strong> Divert incoming grain samples to Station #3 and activate second moisture meter probe.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- High Density Live Queue Telemetry Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Live Intake Stream</span>
+          <h2 class="text-lg font-black text-white">Mandi Yard Telemetry & Vehicle Pipeline</h2>
+        </div>
+        <button type="button" id="refresh-telemetry-btn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition-all flex items-center gap-1.5">
+          <span>🔄</span> Refresh Telemetry
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-300 border-collapse">
+          <thead>
+            <tr class="bg-slate-950 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <th class="py-3 px-4">Token & Booking</th>
+              <th class="py-3 px-4">Farmer Details</th>
+              <th class="py-3 px-4">Vehicle & Crop</th>
+              <th class="py-3 px-4">Scheduled Slot</th>
+              <th class="py-3 px-4">Current Pipeline Stage</th>
+              <th class="py-3 px-4">Allocated Bay / WB</th>
+              <th class="py-3 px-4">Wait Time</th>
+              <th class="py-3 px-4 text-right">Superintendent Action</th>
+            </tr>
+          </thead>
+          <tbody id="telemetry-table-body" class="divide-y divide-slate-800/60 font-mono text-[11px]">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Simulated SMS Dispatch Modal -->
+  <div id="sms-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📲</span>
+          <h3 class="text-sm font-bold text-white uppercase tracking-wide">Simulated Mass SMS Alert Dispatch</h3>
+        </div>
+        <button type="button" onclick="document.getElementById('sms-modal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold">&times;</button>
+      </div>
+
+      <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-emerald-300 space-y-2">
+        <div class="text-[10px] text-slate-400">DISPATCHED TO: <span id="sms-count-display">34 Queued Farmers</span></div>
+        <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-slate-200" id="sms-body-display">
+          अलर्ट: करनाल अनाज मंडी में अचानक भारी बारिश के कारण आपका खरीद स्लॉट 2 घंटे के लिए स्थगित किया गया है। आपका टोकन प्राथमिकता क्रम सुरक्षित रहेगा।
+        </div>
+        <div class="text-[10px] text-teal-400">STATUS: 100% Delivered via National SMS Gateway</div>
+      </div>
+
+      <button type="button" onclick="document.getElementById('sms-modal').classList.add('hidden')" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all">
+        Close / Dismiss Log
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900/60 border-t border-slate-800 py-3 text-center text-xs text-slate-500">
+    KisanSetu • Smart Agricultural Logistics Platform • SIH26032
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/utils.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/event-bus.js"></script>
+  <script src="../js/state-machine.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const centerId = "CTR-KARNAL-01";
+
+      // 1. Fetch Superintendent Telemetry
+      async function loadTelemetry() {
+        try {
+          const res = await fetch(`/api/v1/superintendent/telemetry/${encodeURIComponent(centerId)}`);
+          if (!res.ok) throw new Error("HTTP error");
+          const json = await res.json();
+          if (json.success) {
+            renderTelemetry(json);
+          }
+        } catch (err) {
+          console.warn("loadTelemetry fallback:", err.message);
+        }
+      }
+
+      function renderTelemetry(data) {
+        // Tonnage
+        const tg = data.tonnageGauge || {};
+        document.getElementById("gauge-target-mt").innerHTML = `${tg.targetCapacityMT || 500} <span class="text-sm text-slate-500 font-normal">MT</span>`;
+        document.getElementById("gauge-weighed-mt").innerHTML = `${tg.weighedInboundMT || 312.5} <span class="text-sm text-slate-500 font-normal">MT</span>`;
+        document.getElementById("gauge-enroute-mt").innerHTML = `${tg.enrouteMT || 145} <span class="text-sm text-slate-500 font-normal">MT</span>`;
+        document.getElementById("gauge-intake-pct").textContent = `${tg.intakePercentage || 62.5}% Intake Complete`;
+        document.getElementById("gauge-bar-label").textContent = `${tg.weighedInboundMT || 312.5} MT / ${tg.targetCapacityMT || 500} MT (${tg.intakePercentage || 62.5}%)`;
+        document.getElementById("gauge-progress-bar").style.width = `${Math.min(100, tg.intakePercentage || 62.5)}%`;
+
+        // Circuit Breaker State
+        const cb = data.circuitBreaker || {};
+        const banner = document.getElementById("cb-active-banner");
+        if (cb.isHalted) {
+          banner.classList.remove("hidden");
+          const ev = cb.activeEvent || {};
+          document.getElementById("cb-banner-desc").textContent = `Reason: ${ev.reasonLabel || 'Emergency Halt'} • ${ev.deferHours || 2} Hours Deferral active.`;
+        } else {
+          banner.classList.add("hidden");
+        }
+
+        // Stage Latencies
+        const stagesContainer = document.getElementById("stages-latency-container");
+        const stages = data.stageLatencies || [];
+        stagesContainer.innerHTML = stages.map(s => {
+          const isAlert = s.status === "ELEVATED_BOTTLENECK";
+          const borderClass = isAlert ? "border-rose-500 bg-rose-950/20" : "border-slate-800 bg-slate-950";
+          const textClass = isAlert ? "text-rose-400" : "text-emerald-400";
+          return `
+            <div class="rounded-xl border ${borderClass} p-3.5 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-base">${s.icon}</span>
+                  <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isAlert ? 'bg-rose-500 text-white font-black animate-pulse' : 'bg-slate-800 text-slate-400'}">
+                    ${isAlert ? 'BOTTLENECK' : 'NORMAL'}
+                  </span>
+                </div>
+                <div class="text-xs font-bold text-slate-200 mt-2 truncate">${s.stageNameEn}</div>
+                <div class="text-[10px] text-slate-400 truncate">${s.stageNameHi}</div>
+              </div>
+              <div class="mt-3 pt-2 border-t border-slate-800/80 flex items-baseline justify-between">
+                <span class="text-xl font-black font-mono-num ${textClass}">${s.avgMinutes}m</span>
+                <span class="text-[10px] text-slate-500">Goal: &le;${s.benchmarkMinutes}m</span>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        // Queue Table
+        loadQueueTable();
+      }
+
+      async function loadQueueTable() {
+        try {
+          const res = await fetch(`/api/v1/queue/${encodeURIComponent(centerId)}`);
+          if (!res.ok) return;
+          const json = await res.json();
+          const tbody = document.getElementById("telemetry-table-body");
+          if (!json.data || json.data.length === 0) return;
+
+          tbody.innerHTML = json.data.map(item => {
+            const stage = window.KisanStateMachine ? window.KisanStateMachine.getStage(item.currentStage) : { titleEn: item.currentStage, icon: '🚜', badgeClass: 'bg-teal-50 text-teal-800' };
+            return `
+              <tr class="hover:bg-slate-800/40 transition-colors">
+                <td class="py-3 px-4 font-bold text-white">
+                  <div>${item.tokenId}</div>
+                  <div class="text-[10px] text-slate-500">${item.bookingId}</div>
+                </td>
+                <td class="py-3 px-4">
+                  <div class="text-slate-200 font-bold">${item.farmerName}</div>
+                  <div class="text-[10px] text-slate-400">${item.phone || '98765 43210'}</div>
+                </td>
+                <td class="py-3 px-4">
+                  <div>${item.commodity}</div>
+                  <div class="text-[10px] text-slate-400">HR-05-TR-1234</div>
+                </td>
+                <td class="py-3 px-4 text-slate-300">${item.timeSlot}</td>
+                <td class="py-3 px-4">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${stage.badgeClass}">
+                    <span>${stage.icon}</span>
+                    <span>${stage.titleEn}</span>
+                  </span>
+                </td>
+                <td class="py-3 px-4 text-slate-300">
+                  ${item.assignedBay || item.assignedWeighbridge || 'Assay Bay 1'}
+                </td>
+                <td class="py-3 px-4 font-bold text-emerald-400">
+                  ${item.estimatedWaitMinutes || 15}m
+                </td>
+                <td class="py-3 px-4 text-right">
+                  <button type="button" onclick="advanceItem('${item.bookingId}')" class="px-2.5 py-1 rounded bg-slate-800 hover:bg-teal-600 text-white text-[10px] font-bold transition-all">
+                    Advance Stage &rarr;
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join("");
+        } catch (err) {}
+      }
+
+      window.advanceItem = async function(bookingId) {
+        try {
+          await fetch("/api/v1/queue/advance", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ booking_id: bookingId })
+          });
+          loadTelemetry();
+        } catch (e) {}
+      };
+
+      // Circuit Breaker Actions
+      const triggerBtn = document.getElementById("trigger-circuit-breaker-btn");
+      triggerBtn.addEventListener("click", async () => {
+        const reason = document.getElementById("cb-reason-select").value;
+        const defer = parseInt(document.getElementById("cb-defer-select").value, 10) || 2;
+
+        try {
+          const res = await fetch("/api/v1/superintendent/circuit-breaker", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              center_id: centerId,
+              action: "HALT",
+              reason: reason,
+              defer_hours: defer
+            })
+          });
+          const json = await res.json();
+          if (json.success) {
+            document.getElementById("sms-count-display").textContent = `${json.data.smsCountSent || 34} Queued Farmers`;
+            document.getElementById("sms-modal").classList.remove("hidden");
+            loadTelemetry();
+          }
+        } catch (err) {
+          alert("Error triggering circuit breaker: " + err.message);
+        }
+      });
+
+      document.getElementById("cb-banner-resume-btn").addEventListener("click", async () => {
+        try {
+          const res = await fetch("/api/v1/superintendent/circuit-breaker", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              center_id: centerId,
+              action: "RESUME"
+            })
+          });
+          loadTelemetry();
+        } catch (err) {}
+      });
+
+      document.getElementById("refresh-telemetry-btn").addEventListener("click", loadTelemetry);
+
+      // Event Bus
+      if (window.KisanEventBus) {
+        window.KisanEventBus.connectWebSocket(centerId);
+        window.KisanEventBus.subscribe("*", () => loadTelemetry());
+      }
+
+      // Initial load
+      loadTelemetry();
+    });
+  </script>
+</body>
+
+</html>
