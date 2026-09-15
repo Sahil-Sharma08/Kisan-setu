@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="hi" class="scroll-smooth">
+<html lang="en" class="scroll-smooth">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KisanSetu (किसान सेतु) — Digital Procurement & Queue Intelligence</title>
+  <title>KisanSetu — Digital Procurement & Queue Intelligence</title>
+  <script src="js/i18n.js"></script>
 
   <!-- Typography: Plus Jakarta Sans & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -94,25 +95,25 @@
 
       <!-- Desktop Nav Links -->
       <ul class="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-700">
-        <li><a href="#home" class="hover:text-emerald-700 transition-colors py-1">मुख्य पृष्ठ</a></li>
-        <li><a href="#crops" class="hover:text-emerald-700 transition-colors py-1">फसलें</a></li>
-        <li><a href="#centers" class="hover:text-emerald-700 transition-colors py-1">खरीद केंद्र</a></li>
-        <li><a href="farmer/dashboard.html" class="hover:text-emerald-700 transition-colors py-1 text-emerald-700 font-bold">🌾 किसान पोर्टल</a></li>
+        <li><a href="#home" class="hover:text-emerald-700 transition-colors py-1" data-i18n="nav.home">Home</a></li>
+        <li><a href="#crops" class="hover:text-emerald-700 transition-colors py-1" data-i18n="nav.crops">Crops</a></li>
+        <li><a href="#centers" class="hover:text-emerald-700 transition-colors py-1" data-i18n="nav.centers">Procurement Centers</a></li>
+        <li><a href="farmer/dashboard.html" class="hover:text-emerald-700 transition-colors py-1 text-emerald-700 font-bold" data-i18n="nav.farmerPortal">🌾 Farmer Portal</a></li>
         
         <!-- More Dropdown (ONLY: 7-Step Journey, Compare, FAQ, About) -->
         <li class="relative group">
           <button type="button" class="flex items-center gap-1 hover:text-emerald-700 py-1 cursor-pointer font-semibold">
-            <span>और देखें</span>
+            <span data-i18n="nav.more">More</span>
             <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-700 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
           </button>
           <div class="absolute left-0 top-full pt-1.5 hidden group-hover:block w-48 z-50">
             <div class="bg-white/95 backdrop-blur-md border border-slate-200 shadow-lg rounded-xl py-1.5 text-xs font-semibold">
-              <a href="#journey" class="block px-3 py-1.5 hover:bg-slate-50 hover:text-emerald-700">7-चरणीय प्रक्रिया</a>
-              <a href="#comparison" class="block px-3 py-1.5 hover:bg-slate-50 hover:text-emerald-700">तुलना</a>
-              <a href="#faq" class="block px-3 py-1.5 hover:bg-slate-50 hover:text-emerald-700">सामान्य प्रश्न</a>
-              <a href="#about" class="block px-3 py-1.5 hover:bg-slate-50 hover:text-emerald-700">प्लेटफ़ॉर्म विवरण</a>
+              <a href="#journey" class="block px-3 py-1.5 hover:bg-slate-50 hover:text-emerald-700" data-i18n="nav.journey">7-Step Process</a>
+              <a href="#comparison" class="block px-3 py-1.5 hover:bg-slate-50 hover:text-emerald-700" data-i18n="nav.compare">Comparison</a>
+              <a href="#faq" class="block px-3 py-1.5 hover:bg-slate-50 hover:text-emerald-700" data-i18n="nav.faq">FAQ</a>
+              <a href="#about" class="block px-3 py-1.5 hover:bg-slate-50 hover:text-emerald-700" data-i18n="nav.about">Platform Details</a>
             </div>
           </div>
         </li>
@@ -120,15 +121,28 @@
 
       <!-- Desktop Action Buttons -->
       <div class="hidden sm:flex items-center gap-2.5">
+        <!-- Language Switcher Option (English / Hindi) -->
+        <div class="kisan-lang-switcher inline-flex items-center rounded-xl border border-slate-200 bg-slate-100 p-0.5 text-xs font-semibold shadow-2xs"
+          title="Change language / भाषा बदलें">
+          <button type="button" data-lang="en" onclick="window.KisanI18n && window.KisanI18n.setLanguage('en')"
+            class="px-2.5 py-1 rounded-lg transition-all cursor-pointer">
+            EN
+          </button>
+          <button type="button" data-lang="hi" onclick="window.KisanI18n && window.KisanI18n.setLanguage('hi')"
+            class="px-2.5 py-1 rounded-lg transition-all cursor-pointer">
+            हिन्दी
+          </button>
+        </div>
+
         <button type="button" onclick="window.KisanVoiceAssistant && window.KisanVoiceAssistant.open()"
           class="btn btn-outline btn-sm text-xs font-semibold py-1.5 px-3 rounded-xl border-emerald-300 text-emerald-700 bg-emerald-50/50 hover:bg-emerald-100/60 flex items-center gap-1.5 cursor-pointer">
-          <span>🎙️</span> किसान वाणी AI
+          <span>🎙️</span> <span data-i18n="nav.voiceAssistant">Kisan Vani AI</span>
         </button>
-        <a href="farmer/dashboard.html" class="btn btn-primary btn-sm text-xs font-semibold py-1.5 px-3.5 rounded-xl shadow-xs">
-          किसान पोर्टल
+        <a href="farmer/dashboard.html" class="btn btn-primary btn-sm text-xs font-semibold py-1.5 px-3.5 rounded-xl shadow-xs" data-i18n="nav.farmerPortal">
+          Farmer Portal
         </a>
-        <a href="pages/login.html" class="btn btn-outline btn-sm text-xs font-semibold py-1.5 px-3 rounded-xl border-slate-200">
-          लॉगिन
+        <a href="pages/login.html" class="btn btn-outline btn-sm text-xs font-semibold py-1.5 px-3 rounded-xl border-slate-200" data-i18n="nav.login">
+          Login
         </a>
       </div>
 
@@ -147,16 +161,24 @@
 
     <!-- Mobile Slide-Down Menu -->
     <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 bg-white/95 backdrop-blur-md px-4 py-4 space-y-2.5 text-xs font-semibold text-slate-800">
-      <a href="#home" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-emerald-700 nav-mobile-link">मुख्य पृष्ठ</a>
-      <a href="#crops" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-emerald-700 nav-mobile-link">फसलें</a>
-      <a href="#centers" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-emerald-700 nav-mobile-link">खरीद केंद्र</a>
-      <a href="#journey" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-[#15803d] nav-mobile-link">7-चरणीय प्रक्रिया</a>
-      <a href="#comparison" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-[#15803d] nav-mobile-link">तुलना</a>
-      <a href="#faq" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-[#15803d] nav-mobile-link">सामान्य प्रश्न</a>
-      <a href="#about" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-[#15803d] nav-mobile-link">प्लेटफ़ॉर्म विवरण</a>
+      <!-- Mobile Language Switcher -->
+      <div class="flex items-center justify-between p-2 rounded-xl bg-slate-100 text-xs font-semibold">
+        <span class="text-slate-600">🌐 Language / भाषा:</span>
+        <div class="kisan-lang-switcher inline-flex items-center rounded-lg border border-slate-200 bg-white p-0.5">
+          <button type="button" data-lang="en" onclick="window.KisanI18n && window.KisanI18n.setLanguage('en')" class="px-2.5 py-1 rounded-md">English</button>
+          <button type="button" data-lang="hi" onclick="window.KisanI18n && window.KisanI18n.setLanguage('hi')" class="px-2.5 py-1 rounded-md">हिन्दी</button>
+        </div>
+      </div>
+      <a href="#home" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-emerald-700 nav-mobile-link" data-i18n="nav.home">Home</a>
+      <a href="#crops" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-emerald-700 nav-mobile-link" data-i18n="nav.crops">Crops</a>
+      <a href="#centers" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-emerald-700 nav-mobile-link" data-i18n="nav.centers">Procurement Centers</a>
+      <a href="#journey" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-[#15803d] nav-mobile-link" data-i18n="nav.journey">7-Step Process</a>
+      <a href="#comparison" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-[#15803d] nav-mobile-link" data-i18n="nav.compare">Comparison</a>
+      <a href="#faq" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-[#15803d] nav-mobile-link" data-i18n="nav.faq">FAQ</a>
+      <a href="#about" class="block py-1.5 px-2 hover:bg-slate-50 hover:text-[#15803d] nav-mobile-link" data-i18n="nav.about">Platform Details</a>
       <div class="pt-2 border-t border-slate-100 flex gap-2">
-        <a href="farmer/dashboard.html" class="btn btn-primary btn-sm flex-1 text-center py-2 nav-mobile-link">किसान पोर्टल</a>
-        <a href="pages/login.html" class="btn btn-outline btn-sm flex-1 text-center py-2 nav-mobile-link">लॉगिन</a>
+        <a href="farmer/dashboard.html" class="btn btn-primary btn-sm flex-1 text-center py-2 nav-mobile-link" data-i18n="nav.farmerPortal">Farmer Portal</a>
+        <a href="pages/login.html" class="btn btn-outline btn-sm flex-1 text-center py-2 nav-mobile-link" data-i18n="nav.login">Login</a>
       </div>
     </div>
   </header>

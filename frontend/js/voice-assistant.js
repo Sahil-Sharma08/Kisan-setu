@@ -31,11 +31,20 @@
     ttsEnabled: true,
     hasSpokenWelcome: false,
     welcomeAudioText: '',
-    currentLanguage: 'hi-IN', // 'hi-IN' or 'en-IN'
+    currentLanguage: (window.KisanI18n && window.KisanI18n.getLanguage() === 'hi') ? 'hi-IN' : 'en-IN',
     activeUtterance: null,
     recognition: null,
     messages: []
   };
+
+  window.addEventListener('kisan_language_changed', (e) => {
+    if (e.detail && e.detail.lang) {
+      State.currentLanguage = e.detail.lang === 'hi' ? 'hi-IN' : 'en-IN';
+      if (State.recognition) {
+        State.recognition.lang = State.currentLanguage;
+      }
+    }
+  });
 
   // Offline/Fallback Knowledge for 100% Reliability
   const LOCAL_KNOWLEDGE = {
