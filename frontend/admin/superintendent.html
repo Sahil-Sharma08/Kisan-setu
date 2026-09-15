@@ -9,7 +9,9 @@
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap"
+    rel="stylesheet">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -21,13 +23,17 @@
     .font-mono-num {
       font-family: 'JetBrains Mono', monospace;
     }
+
     @media print {
       body * {
         visibility: hidden !important;
       }
-      #j-form-modal, #j-form-modal * {
+
+      #j-form-modal,
+      #j-form-modal * {
         visibility: visible !important;
       }
+
       #j-form-modal {
         position: absolute !important;
         left: 0 !important;
@@ -39,6 +45,7 @@
         margin: 0 !important;
         display: block !important;
       }
+
       .no-print {
         display: none !important;
       }
@@ -52,17 +59,19 @@
   <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40 shadow-xl">
     <div class="container mx-auto px-4 py-3">
       <div class="flex flex-wrap items-center justify-between gap-4">
-        
+
         <!-- Brand & Center Context -->
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-[#0f766e] text-white flex items-center justify-center font-black text-lg shadow-md shadow-teal-900/40">
+          <div
+            class="w-10 h-10 rounded-xl bg-[#0f766e] text-white flex items-center justify-center font-black text-lg shadow-md shadow-teal-900/40">
             K
           </div>
           <div>
             <div class="flex items-center gap-2">
               <span class="text-base sm:text-lg font-bold text-white tracking-tight">KisanSetu</span>
               <span class="text-xs text-slate-400">| Superintendent Command Center</span>
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/40 uppercase">
+              <span
+                class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-500/20 text-teal-300 border border-teal-500/40 uppercase">
                 CONTROL ROOM
               </span>
             </div>
@@ -74,16 +83,20 @@
 
         <!-- Navigation Tabs & Actions -->
         <div class="flex items-center gap-3">
-          <a href="../yard-screen.html" target="_blank" class="btn btn-outline btn-sm text-xs font-bold py-1.5 px-3 border-teal-500/60 text-teal-300 hover:bg-teal-950 flex items-center gap-1.5">
+          <a href="../yard-screen.html" target="_blank"
+            class="btn btn-outline btn-sm text-xs font-bold py-1.5 px-3 border-teal-500/60 text-teal-300 hover:bg-teal-950 flex items-center gap-1.5">
             <span>📺</span> Live Yard Billboard
           </a>
-          <a href="dashboard.html" class="btn btn-outline btn-sm text-xs font-semibold py-1.5 px-3 text-slate-300 border-slate-700 hover:bg-slate-800">
+          <a href="dashboard.html"
+            class="btn btn-outline btn-sm text-xs font-semibold py-1.5 px-3 text-slate-300 border-slate-700 hover:bg-slate-800">
             Admin Overview
           </a>
-          <a href="../operator/queue.html" class="btn btn-outline btn-sm text-xs font-semibold py-1.5 px-3 text-slate-300 border-slate-700 hover:bg-slate-800">
+          <a href="../operator/queue.html"
+            class="btn btn-outline btn-sm text-xs font-semibold py-1.5 px-3 text-slate-300 border-slate-700 hover:bg-slate-800">
             Operator Queue
           </a>
-          <button type="button" id="logout-btn" class="btn btn-outline btn-sm text-xs py-1.5 px-3 text-rose-300 border-rose-900 hover:bg-rose-950">
+          <button type="button" id="logout-btn"
+            class="btn btn-outline btn-sm text-xs py-1.5 px-3 text-rose-300 border-rose-900 hover:bg-rose-950">
             Logout
           </button>
         </div>
@@ -96,9 +109,11 @@
   <main class="container mx-auto py-6 px-4 flex-1 space-y-6">
 
     <!-- Active Circuit Breaker Alert Banner (If halted) -->
-    <div id="cb-active-banner" class="hidden p-4 rounded-2xl bg-rose-950/90 border-2 border-rose-500 shadow-2xl flex flex-wrap items-center justify-between gap-4">
+    <div id="cb-active-banner"
+      class="hidden p-4 rounded-2xl bg-rose-950/90 border-2 border-rose-500 shadow-2xl flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xl font-black animate-pulse">
+        <div
+          class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xl font-black animate-pulse">
           ⚡
         </div>
         <div>
@@ -111,7 +126,8 @@
           </p>
         </div>
       </div>
-      <button type="button" id="cb-banner-resume-btn" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition-all shadow-lg">
+      <button type="button" id="cb-banner-resume-btn"
+        class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black transition-all shadow-lg">
         Resume Normal Operations
       </button>
     </div>
@@ -120,13 +136,16 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
       <!-- Tonnage Gauge Radial / Telemetry (8 Cols) -->
-      <div class="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+      <div
+        class="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-4 border-b border-slate-800 pb-3">
           <div>
-            <span class="text-xs font-bold text-teal-400 uppercase tracking-wider">Real-Time Intake & Tonnage Gauge</span>
+            <span class="text-xs font-bold text-teal-400 uppercase tracking-wider">Real-Time Intake &amp; Tonnage
+              Gauge</span>
             <h1 class="text-xl font-black text-white">दैनिक खरीद टन भार मापक (Procurement Tonnage Gauge)</h1>
           </div>
-          <span class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">
+          <span
+            class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">
             RATE: ~38.4 MT/HR
           </span>
         </div>
@@ -134,7 +153,8 @@
         <!-- 3-Way Metrics Comparison: Target vs Weighed Inbound vs En-Route -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-center">
           <div class="bg-slate-950 border border-slate-800/80 rounded-xl p-4">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Target Daily Capacity</span>
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Target Daily
+              Capacity</span>
             <div class="text-3xl font-black font-mono-num text-purple-400 mt-1" id="gauge-target-mt">
               500.0 <span class="text-sm text-slate-500 font-normal">MT</span>
             </div>
@@ -142,7 +162,8 @@
           </div>
 
           <div class="bg-slate-950 border border-emerald-900/60 rounded-xl p-4">
-            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block">Weighed Inbound (Net)</span>
+            <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block">Weighed Inbound
+              (Net)</span>
             <div class="text-3xl font-black font-mono-num text-emerald-300 mt-1" id="gauge-weighed-mt">
               312.5 <span class="text-sm text-slate-500 font-normal">MT</span>
             </div>
@@ -150,7 +171,8 @@
           </div>
 
           <div class="bg-slate-950 border border-amber-900/60 rounded-xl p-4">
-            <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider block">En-Route / Scheduled</span>
+            <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider block">En-Route /
+              Scheduled</span>
             <div class="text-3xl font-black font-mono-num text-amber-300 mt-1" id="gauge-enroute-mt">
               145.0 <span class="text-sm text-slate-500 font-normal">MT</span>
             </div>
@@ -165,7 +187,8 @@
             <span id="gauge-bar-label">312.5 MT / 500.0 MT (62.5%)</span>
           </div>
           <div class="w-full h-4 bg-slate-950 rounded-full border border-slate-800 overflow-hidden relative">
-            <div id="gauge-progress-bar" class="h-full bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-400 transition-all duration-700 rounded-full" style="width: 62.5%;"></div>
+            <div id="gauge-progress-bar"
+              class="w-[62.5%] h-full bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-400 transition-all duration-700 rounded-full"></div>
           </div>
           <div class="flex items-center justify-between text-[11px] text-slate-500 font-mono">
             <span>0 MT</span>
@@ -176,7 +199,8 @@
       </div>
 
       <!-- Emergency Circuit Breaker Trigger Box (4 Cols) -->
-      <div class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
+      <div
+        class="lg:col-span-4 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
         <div>
           <div class="flex items-center gap-2 mb-2">
             <span class="w-3 h-3 rounded-full bg-rose-500"></span>
@@ -185,13 +209,15 @@
             </h2>
           </div>
           <p class="text-xs text-slate-400 leading-relaxed mb-4">
-            Instantly halt incoming traffic and upcoming slots in case of sudden weather changes, machinery breakdown, or godown saturation.
+            Instantly halt incoming traffic and upcoming slots in case of sudden weather changes, machinery breakdown,
+            or godown saturation.
           </p>
 
           <div class="space-y-3">
             <div>
               <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Reason for Halt (कारण)</label>
-              <select id="cb-reason-select" class="w-full bg-slate-950 border border-slate-700 text-xs font-bold rounded-lg p-2.5 text-slate-200 focus:ring-1 focus:ring-rose-500">
+              <select id="cb-reason-select"
+                class="w-full bg-slate-950 border border-slate-700 text-xs font-bold rounded-lg p-2.5 text-slate-200 focus:ring-1 focus:ring-rose-500">
                 <option value="RAIN">अचानक भारी बारिश (Sudden Unseasonal Rain)</option>
                 <option value="MACHINE_BREAKDOWN">वेईब्रिज मशीन खराबी (Weighbridge Breakdown)</option>
                 <option value="GODOWN_SATURATED">गोदाम क्षमता पूर्ण (Godown Saturation Limit)</option>
@@ -200,8 +226,10 @@
             </div>
 
             <div>
-              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Deferral Duration (स्थगित अवधि)</label>
-              <select id="cb-defer-select" class="w-full bg-slate-950 border border-slate-700 text-xs font-bold rounded-lg p-2.5 text-slate-200 focus:ring-1 focus:ring-rose-500">
+              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Deferral Duration (स्थगित
+                अवधि)</label>
+              <select id="cb-defer-select"
+                class="w-full bg-slate-950 border border-slate-700 text-xs font-bold rounded-lg p-2.5 text-slate-200 focus:ring-1 focus:ring-rose-500">
                 <option value="1">1 Hour Deferral (+60 Mins)</option>
                 <option value="2" selected>2 Hours Deferral (+120 Mins)</option>
                 <option value="3">3 Hours Deferral (+180 Mins)</option>
@@ -212,9 +240,10 @@
         </div>
 
         <div class="mt-6 pt-4 border-t border-slate-800 space-y-2">
-          <button type="button" id="trigger-circuit-breaker-btn" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-700 to-rose-600 hover:from-rose-600 hover:to-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-rose-950/50 flex items-center justify-center gap-2">
+          <button type="button" id="trigger-circuit-breaker-btn"
+            class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-rose-700 to-rose-600 hover:from-rose-600 hover:to-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all shadow-lg shadow-rose-950/50 flex items-center justify-center gap-2">
             <span>⚠️</span>
-            <span>Halt Upcoming Slots & Send Mass SMS</span>
+            <span>Halt Upcoming Slots &amp; Send Mass SMS</span>
           </button>
           <div class="text-[10px] text-slate-500 text-center font-mono">
             Simulates automated SMS dispatch to all queued farmers.
@@ -230,10 +259,11 @@
         <div>
           <span class="text-xs font-bold text-teal-400 uppercase tracking-wider">End-to-End Turnaround Analytics</span>
           <h2 class="text-lg font-black text-white">
-            चरण विलंबता एवं रुकावट ट्रैकर (Stage Latency & Bottleneck Detector)
+            चरण विलंबता एवं रुकावट ट्रैकर (Stage Latency &amp; Bottleneck Detector)
           </h2>
         </div>
-        <div id="bottleneck-indicator-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1.5">
+        <div id="bottleneck-indicator-badge"
+          class="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-rose-400 animate-ping"></span>
           <span>1 Active Bottleneck Detected</span>
         </div>
@@ -245,7 +275,8 @@
       </div>
 
       <!-- Highlighted Bottleneck Root Cause Alert Box -->
-      <div id="bottleneck-alert-card" class="p-4 rounded-xl bg-rose-950/40 border border-rose-700/60 flex items-start gap-3">
+      <div id="bottleneck-alert-card"
+        class="p-4 rounded-xl bg-rose-950/40 border border-rose-700/60 flex items-start gap-3">
         <span class="text-2xl mt-0.5">⚠️</span>
         <div class="flex-1">
           <div class="text-xs font-black text-rose-300 uppercase tracking-wider">
@@ -253,7 +284,8 @@
           </div>
           <p class="text-xs text-rose-100 mt-1 leading-relaxed">
             Average turnaround latency elevated to <strong>38.5 mins</strong> (Benchmark: &le; 15 mins).
-            <strong>Recommendation:</strong> Divert incoming grain samples to Station #3 and activate second moisture meter probe.
+            <strong>Recommendation:</strong> Divert incoming grain samples to Station #3 and activate second moisture
+            meter probe.
           </p>
         </div>
       </div>
@@ -264,9 +296,10 @@
       <div class="flex items-center justify-between border-b border-slate-800 pb-3">
         <div>
           <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Live Intake Stream</span>
-          <h2 class="text-lg font-black text-white">Mandi Yard Telemetry & Vehicle Pipeline</h2>
+          <h2 class="text-lg font-black text-white">Mandi Yard Telemetry &amp; Vehicle Pipeline</h2>
         </div>
-        <button type="button" id="refresh-telemetry-btn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition-all flex items-center gap-1.5">
+        <button type="button" id="refresh-telemetry-btn"
+          class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition-all flex items-center gap-1.5">
           <span>🔄</span> Refresh Telemetry
         </button>
       </div>
@@ -274,15 +307,16 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs text-slate-300 border-collapse">
           <thead>
-            <tr class="bg-slate-950 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              <th class="py-3 px-4">Token & Booking</th>
-              <th class="py-3 px-4">Farmer Details</th>
-              <th class="py-3 px-4">Vehicle & Crop</th>
-              <th class="py-3 px-4">Scheduled Slot</th>
-              <th class="py-3 px-4">Current Pipeline Stage</th>
-              <th class="py-3 px-4">Allocated Bay / WB</th>
-              <th class="py-3 px-4">Wait Time</th>
-              <th class="py-3 px-4 text-right">Superintendent Action</th>
+            <tr
+              class="bg-slate-950 border-b border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <th scope="col" class="py-3 px-4">Token &amp; Booking</th>
+              <th scope="col" class="py-3 px-4">Farmer Details</th>
+              <th scope="col" class="py-3 px-4">Vehicle &amp; Crop</th>
+              <th scope="col" class="py-3 px-4">Scheduled Slot</th>
+              <th scope="col" class="py-3 px-4">Current Pipeline Stage</th>
+              <th scope="col" class="py-3 px-4">Allocated Bay / WB</th>
+              <th scope="col" class="py-3 px-4">Wait Time</th>
+              <th scope="col" class="py-3 px-4 text-right">Superintendent Action</th>
             </tr>
           </thead>
           <tbody id="telemetry-table-body" class="divide-y divide-slate-800/60 font-mono text-[11px]">
@@ -295,45 +329,55 @@
   </main>
 
   <!-- Simulated SMS Dispatch Modal -->
-  <div id="sms-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+  <div id="sms-modal"
+    class="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <div class="flex items-center gap-2">
           <span class="text-xl">📲</span>
           <h3 class="text-sm font-bold text-white uppercase tracking-wide">Simulated Mass SMS Alert Dispatch</h3>
         </div>
-        <button type="button" onclick="document.getElementById('sms-modal').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold">&times;</button>
+        <button type="button" onclick="document.getElementById('sms-modal').classList.add('hidden')"
+          class="text-slate-400 hover:text-white font-bold">&times;</button>
       </div>
 
       <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-emerald-300 space-y-2">
-        <div class="text-[10px] text-slate-400">DISPATCHED TO: <span id="sms-count-display">34 Queued Farmers</span></div>
+        <div class="text-[10px] text-slate-400">DISPATCHED TO: <span id="sms-count-display">34 Queued Farmers</span>
+        </div>
         <div class="p-3 bg-slate-900 rounded-lg border border-slate-800 text-slate-200" id="sms-body-display">
-          अलर्ट: करनाल अनाज मंडी में अचानक भारी बारिश के कारण आपका खरीद स्लॉट 2 घंटे के लिए स्थगित किया गया है। आपका टोकन प्राथमिकता क्रम सुरक्षित रहेगा।
+          अलर्ट: करनाल अनाज मंडी में अचानक भारी बारिश के कारण आपका खरीद स्लॉट 2 घंटे के लिए स्थगित किया गया है। आपका
+          टोकन प्राथमिकता क्रम सुरक्षित रहेगा।
         </div>
         <div class="text-[10px] text-teal-400">STATUS: 100% Delivered via National SMS Gateway</div>
       </div>
 
-      <button type="button" onclick="document.getElementById('sms-modal').classList.add('hidden')" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all">
+      <button type="button" onclick="document.getElementById('sms-modal').classList.add('hidden')"
+        class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition-all">
         Close / Dismiss Log
       </button>
     </div>
   </div>
 
   <!-- Statutory Digital J-Form Inspection Modal -->
-  <div id="j-form-modal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-300 my-auto text-slate-900 relative print:p-0 print:border-none print:shadow-none print:max-w-none">
-      
+  <div id="j-form-modal"
+    class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs hidden flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+    <div
+      class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-300 my-auto text-slate-900 relative print:p-0 print:border-none print:shadow-none print:max-w-none">
+
       <!-- Modal Controls (no-print) -->
       <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-200 no-print">
         <div class="flex items-center gap-2">
           <span class="text-xl">📜</span>
-          <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">कानूनी खरीद प्रमाण पत्र (Statutory e-J-Form Inspection)</span>
+          <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">कानूनी खरीद प्रमाण पत्र (Statutory
+            e-J-Form Inspection)</span>
         </div>
         <div class="flex items-center gap-2">
-          <button type="button" onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs">
+          <button type="button" onclick="window.print()"
+            class="px-3 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs">
             <span>🖨️</span> प्रिंट / PDF डाउनलोड
           </button>
-          <button type="button" onclick="document.getElementById('j-form-modal').classList.add('hidden')" class="text-slate-400 hover:text-slate-700 text-xl font-bold px-2">
+          <button type="button" onclick="document.getElementById('j-form-modal').classList.add('hidden')"
+            class="text-slate-400 hover:text-slate-700 text-xl font-bold px-2">
             &times;
           </button>
         </div>
@@ -341,7 +385,7 @@
 
       <!-- J-Form Printable Document Sheet -->
       <div class="border-2 border-slate-800 p-6 rounded-xl bg-white space-y-4" id="j-form-document-sheet">
-        
+
         <!-- State APMC Header -->
         <div class="text-center pb-3 border-b-2 border-slate-800">
           <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
@@ -353,7 +397,8 @@
           <div class="text-xs font-bold text-slate-700">
             [कृषि उपज मंडी नियम 24(1) के अंतर्गत जारी बिक्री रसीद • Sale Receipt Under Rule 24(1)]
           </div>
-          <div class="flex items-center justify-between text-xs font-mono font-bold mt-3 px-2 pt-2 border-t border-slate-200">
+          <div
+            class="flex items-center justify-between text-xs font-mono font-bold mt-3 px-2 pt-2 border-t border-slate-200">
             <div>जे-फॉर्म क्रमांक: <span id="jf-number" class="text-teal-800 font-black">JF-HR-2026-10492</span></div>
             <div>जारी तिथि: <span id="jf-date">14-09-2026</span></div>
           </div>
@@ -369,10 +414,12 @@
           <div>
             <span class="text-slate-500 block text-[10px] uppercase font-bold">किसान का नाम (Farmer Name)</span>
             <span class="font-bold text-slate-900" id="jf-farmer-name">सुरेश कुमार (Suresh Kumar)</span>
-            <span class="text-[10px] text-slate-500 block">आधार: <span id="jf-aadhaar">XXXX-XXXX-4819</span> • फोन: <span id="jf-phone">9876543210</span></span>
+            <span class="text-[10px] text-slate-500 block">आधार: <span id="jf-aadhaar">XXXX-XXXX-4819</span> • फोन:
+              <span id="jf-phone">9876543210</span></span>
           </div>
           <div>
-            <span class="text-slate-500 block text-[10px] uppercase font-bold">फसल एवं किस्म (Commodity & Variety)</span>
+            <span class="text-slate-500 block text-[10px] uppercase font-bold">फसल एवं किस्म (Commodity &amp;
+              Variety)</span>
             <span class="font-bold text-slate-900" id="jf-crop">गेहूं (Wheat - FAQ)</span>
           </div>
           <div>
@@ -390,10 +437,10 @@
           <table class="w-full text-xs text-left border border-slate-300 rounded-lg overflow-hidden">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-300 text-[11px]">
               <tr>
-                <th class="p-2">विवरण (Description)</th>
-                <th class="p-2 text-right">किलोग्राम (Kg)</th>
-                <th class="p-2 text-right">क्विंटल (Quintals)</th>
-                <th class="p-2 text-right">प्रमाणीकरण</th>
+                <th scope="col" class="p-2">विवरण (Description)</th>
+                <th scope="col" class="p-2 text-right">किलोग्राम (Kg)</th>
+                <th scope="col" class="p-2 text-right">क्विंटल (Quintals)</th>
+                <th scope="col" class="p-2 text-right">प्रमाणीकरण</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200 font-mono text-xs">
@@ -422,16 +469,17 @@
         <!-- Quality & Financial Settlement Table -->
         <div>
           <div class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1 flex items-center justify-between">
-            <span>2. गुणवत्ता एवं वित्तीय भुगतान विवरण (MSP Settlement & Deductions)</span>
-            <span class="text-[10px] text-slate-600">नमी: <strong id="jf-moisture">11.4%</strong> (मानक सीमा &le;12.0%)</span>
+            <span>2. गुणवत्ता एवं वित्तीय भुगतान विवरण (MSP Settlement &amp; Deductions)</span>
+            <span class="text-[10px] text-slate-600">नमी: <strong id="jf-moisture">11.4%</strong> (मानक सीमा
+              &amp;le;12.0%)</span>
           </div>
           <table class="w-full text-xs text-left border border-slate-300 rounded-lg overflow-hidden">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-300 text-[11px]">
               <tr>
-                <th class="p-2">मद (Item)</th>
-                <th class="p-2 text-right">दर (MSP Rate)</th>
-                <th class="p-2 text-right">कटौती (Deduction)</th>
-                <th class="p-2 text-right">कुल देय राशि (Net Amount INR)</th>
+                <th scope="col" class="p-2">मद (Item)</th>
+                <th scope="col" class="p-2 text-right">दर (MSP Rate)</th>
+                <th scope="col" class="p-2 text-right">कटौती (Deduction)</th>
+                <th scope="col" class="p-2 text-right">कुल देय राशि (Net Amount INR)</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-200">
@@ -447,7 +495,8 @@
               <tr class="bg-teal-100/70 text-slate-900 font-black text-sm">
                 <td class="p-2.5" colspan="3">
                   <div>कुल शुद्ध देय राशि (Total Net Payable to Farmer):</div>
-                  <div class="text-[10px] font-normal text-slate-700" id="jf-amount-words">रुपये सात लाख छियासठ हजार तीन सौ मात्र</div>
+                  <div class="text-[10px] font-normal text-slate-700" id="jf-amount-words">रुपये सात लाख छियासठ हजार तीन
+                    सौ मात्र</div>
                 </td>
                 <td class="p-2.5 text-right font-mono text-teal-900 text-base font-black" id="jf-net-payable">
                   ₹7,66,300.00
@@ -459,7 +508,8 @@
 
         <!-- Direct Benefit Transfer (DBT) Banking Order -->
         <div class="p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs">
-          <div class="text-[11px] font-bold text-slate-800 uppercase tracking-wider mb-1 flex items-center justify-between">
+          <div
+            class="text-[11px] font-bold text-slate-800 uppercase tracking-wider mb-1 flex items-center justify-between">
             <span>3. प्रत्यक्ष लाभ अंतरण आदेश (PFMS / DBT Payment Order)</span>
             <span class="px-2 py-0.5 rounded bg-teal-100 text-teal-800 font-bold text-[10px]">DBT AUTHORIZED</span>
           </div>
@@ -478,7 +528,8 @@
             </div>
             <div>
               <span class="text-slate-400 block text-[9px] uppercase font-bold">लेनदेन आईडी (PFMS Txn)</span>
-              <span class="font-mono font-bold text-slate-900 truncate block" id="jf-dbt-txn">PFMS-DBT-20260914-99121</span>
+              <span class="font-mono font-bold text-slate-900 truncate block"
+                id="jf-dbt-txn">PFMS-DBT-20260914-99121</span>
             </div>
           </div>
         </div>
@@ -486,7 +537,8 @@
         <!-- Cryptographic Seal Footer -->
         <div class="pt-3 border-t border-slate-300 flex items-center justify-between text-[10px] text-slate-500">
           <div>
-            <div>डिजिटल हस्ताक्षर: <span class="font-mono text-slate-800 font-bold" id="jf-sig">e4f7a91b8c24</span> (Certified)</div>
+            <div>डिजिटल हस्ताक्षर: <span class="font-mono text-slate-800 font-bold" id="jf-sig">e4f7a91b8c24</span>
+              (Certified)</div>
             <div>यह एक कंप्यूटर जनित कानूनी दस्तावेज है। हस्ताक्षर की आवश्यकता नहीं है।</div>
           </div>
           <div class="text-right font-mono text-[9px]">
@@ -637,10 +689,10 @@
               </tr>
             `;
           }).join("");
-        } catch (err) {}
+        } catch (err) { }
       }
 
-      window.openSuperintendentJForm = async function(tokenOrBookingId) {
+      window.openSuperintendentJForm = async function (tokenOrBookingId) {
         try {
           const res = await fetch(`/api/v1/queue/j-form/${encodeURIComponent(tokenOrBookingId)}`);
           if (!res.ok) {
@@ -682,7 +734,7 @@
         }
       };
 
-      window.advanceItem = async function(bookingId) {
+      window.advanceItem = async function (bookingId) {
         try {
           await fetch("/api/v1/queue/advance", {
             method: "POST",
@@ -690,7 +742,7 @@
             body: JSON.stringify({ booking_id: bookingId })
           });
           loadTelemetry();
-        } catch (e) {}
+        } catch (e) { }
       };
 
       // Circuit Breaker Actions
@@ -732,7 +784,7 @@
             })
           });
           loadTelemetry();
-        } catch (err) {}
+        } catch (err) { }
       });
 
       document.getElementById("refresh-telemetry-btn").addEventListener("click", loadTelemetry);
