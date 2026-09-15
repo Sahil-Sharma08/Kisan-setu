@@ -333,6 +333,19 @@
 
             <!-- Action Area -->
             <div class="pt-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2">
+                <button type="button" id="call-token-pa-btn"
+                  class="btn bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs py-2.5 px-3 flex items-center justify-center gap-1.5 shadow-xs">
+                  <span>📢</span>
+                  <span>Call Token (गेट उद्घोषणा)</span>
+                </button>
+                <button type="button" id="play-chime-test-btn"
+                  class="btn btn-outline text-slate-700 text-xs font-bold py-2.5 px-3 flex items-center justify-center gap-1.5">
+                  <span>🔔</span>
+                  <span>Audio Chime (घंटी बजाएं)</span>
+                </button>
+              </div>
+
               <button type="button" id="execute-gate-verify-btn"
                 class="w-full btn btn-primary text-xs font-bold py-3 flex items-center justify-center gap-2 shadow-xs">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -373,6 +386,7 @@
   <script src="../js/event-bus.js"></script>
   <script src="../js/i18n.js"></script>
   <script src="operator.js"></script>
+  <script src="../js/voice-assistant.js"></script>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -674,6 +688,25 @@
         isSimulatedOverdue = false;
         document.getElementById('token-input').value = "KS-TKN-FORGED-99";
         selectBooking("KS-TKN-1033", "FORGED");
+      });
+
+      // Gate PA Callout & Chime Handlers
+      document.getElementById('call-token-pa-btn')?.addEventListener('click', () => {
+        const tokenId = document.getElementById('inspect-token-id')?.textContent || 'KS-TKN-1011';
+        const farmer = document.getElementById('inspect-farmer-name')?.textContent || 'किसान भाई';
+        if (window.KisanVoiceAssistant && typeof window.KisanVoiceAssistant.announceToken === 'function') {
+          window.KisanVoiceAssistant.announceToken(tokenId, 1, farmer);
+          showToast('info', '📢 गेट ध्वनि उद्घोषणा प्रसारित', `टोकन #${tokenId} (${farmer}) को गेट नंबर 1 पर आमंत्रित किया गया है।`);
+        } else {
+          showToast('info', '📢 उद्घोषणा', `टोकन #${tokenId} को गेट नंबर 1 पर बुलाया गया।`);
+        }
+      });
+
+      document.getElementById('play-chime-test-btn')?.addEventListener('click', () => {
+        if (window.KisanVoiceAssistant && typeof window.KisanVoiceAssistant.playChime === 'function') {
+          window.KisanVoiceAssistant.playChime();
+          showToast('info', '🔔 ऑडियो चाइम', 'गेट उद्घोषणा चाइम ध्वनि सफलतापूर्वक बजाई गई।');
+        }
       });
 
       // Initial Render
