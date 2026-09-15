@@ -744,6 +744,56 @@
       };
     }
 
+    // 4. Fertilizer / Urea / DAP Dosage Queries (Ported from Kisan-Setu)
+    if (qLower.includes('urea') || qLower.includes('यूरिया') || qLower.includes('खाद') || qLower.includes('fertilizer') || qLower.includes('dap') || qLower.includes('डीएपी') || qLower.includes('पोषण')) {
+      return {
+        response: `🌿 **वैज्ञानिक उर्वरक एवं पोषण प्रबंधन (Scientific Fertilizer Advisory)**:\n\n` +
+          `• **डीएपी (DAP):** 50 से 55 किलोग्राम प्रति एकड़ बुवाई के समय बेसल डोज के रूप में डालें।\n` +
+          `• **यूरिया (Urea) तीन चरणों में:** कुल 45 किग्रा/एकड़ (50% बुवाई पर, 25% प्रथम सिंचाई 21 दिन पर, 25% कल्ले फूटते समय)।\n` +
+          `• **जिंक सल्फेट:** 10 किग्रा प्रति एकड़ (21% जिंक)। डीएपी के साथ कभी न मिलाएं।\n` +
+          `• **मृदा रिपोर्ट आधारित लाभ:** सिफारिश अनुसार खाद का प्रयोग करने पर **Grade A खरीद बोनस** की पात्रता मिलती है।`,
+        audio_text: "गेहूं और रबी फसलों के लिए 50 किलो डीएपी बुवाई के समय तथा 45 किलो यूरिया तीन चरणों में पहली और दूसरी सिंचाई पर डालें।",
+        quick_actions: [
+          { label: "🧪 मृदा परीक्षण कार्ड", url: "farmer/soil-testing.html" }
+        ],
+        suggestions: ["यूरिया कब डालना चाहिए?", "मृदा परीक्षण के क्या नियम हैं?", "गेहूं का भाव क्या है?"]
+      };
+    }
+
+    // 5. Soil Testing & 48-Hour SLA Guarantee Queries
+    if (qLower.includes('मृदा') || qLower.includes('soil') || qLower.includes('मिट्टी') || qLower.includes('sla') || qLower.includes('testing') || qLower.includes('स्वास्थ्य कार्ड')) {
+      return {
+        response: `🧪 **मृदा परीक्षण एवं 48-घंटे सेवा गारंटी (48-Hour Working SLA)**:\n\n` +
+          `• **48-घंटे सेवा गारंटी:** आवेदन के 48 कार्य घंटों के भीतर प्रयोगशाला टीम नमूना संकलित कर डिजिटल हेल्थ कार्ड जारी करती है।\n` +
+          `• **जांच घटक:** नाइट्रोजन (N), फास्फोरस (P), पोटाश (K), पीएच (pH), जैविक कार्बन (OC%), एवं ईसी (EC)।\n` +
+          `• **अनुपालन प्रमाणीकरण:** वैज्ञानिक सलाह का पालन करने पर किसान को 'प्रमाणित अनुपालन बैच' और बोनस मिलता है।`,
+        audio_text: "सरकारी सेवा गारंटी अनुसार 48 कार्य घंटों के भीतर प्रयोगशाला टीम मृदा स्वास्थ्य कार्ड और वैज्ञानिक खाद की सिफारिश जारी करती है।",
+        quick_actions: [
+          { label: "🧪 मृदा जांच आवेदन", url: "farmer/soil-testing.html" }
+        ],
+        suggestions: ["डीएपी की कितनी मात्रा डालें?", "टोकन कैसे बुक करें?"]
+      };
+    }
+
+    // 6. Real-time Weather Queries
+    if (qLower.includes('मौसम') || qLower.includes('weather') || qLower.includes('बारिश') || qLower.includes('rain') || qLower.includes('तापमान')) {
+      const w = window.KisanAgriService?.weatherCache;
+      if (w) {
+        return {
+          response: `🌤️ **लाइव मौसम स्थिति (${w.location}, ${w.region})**:\n\n` +
+            `• **तापमान:** ${w.tempC}°C (अनुभूत: ${w.feelsLikeC}°C)\n` +
+            `• **आर्द्रता:** ${w.humidity}% • **हवा:** ${w.windKph} km/h (${w.windDir})\n` +
+            `• **स्थिति:** ${w.conditionText}\n` +
+            `• **कृषि सलाह:** ${w.agroAdvice?.desc || 'मौसम कृषि कार्यों के लिए अनुकूल है।'}`,
+          audio_text: `वर्तमान में तापमान ${w.tempC} डिग्री और मौसम ${w.conditionText} है। ${w.agroAdvice?.desc || ''}`,
+          quick_actions: [
+            { label: "🌾 डैशबोर्ड देखें", url: "farmer/dashboard.html" }
+          ],
+          suggestions: ["आज बारिश होगी क्या?", "फसलों के भाव क्या हैं?"]
+        };
+      }
+    }
+
     // Default Fallback
     return {
       response: `🌾 **किसान वाणी सहायता**:\n\n` +
@@ -898,7 +948,47 @@
   }
 
   // -------------------------------------------------------------
-  // 8. PUBLIC API & DOMCONTENTLOADED INITIALIZATION
+  // 8. AUDIO CHIME & GATE PA ANNOUNCER
+  // -------------------------------------------------------------
+  function playAudioChime() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.85);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.85);
+    } catch (e) {
+      console.warn("Chime audio error:", e);
+    }
+  }
+
+  function announceTokenPA(tokenNumber, gateNumber = 2, farmerName = '') {
+    playAudioChime();
+    setTimeout(() => {
+      const hiText = `कृपया ध्यान दें। टोकन नंबर ${tokenNumber}। कृपया प्रवेश गेट नंबर ${gateNumber} पर आगे बढ़ें।`;
+      const enText = `Attention please. Token number ${tokenNumber}. Please proceed to Gate number ${gateNumber}.`;
+      speakText(`${hiText} ${enText}`);
+    }, 450);
+
+    if (window.KisanEventBus && typeof window.KisanEventBus.publish === 'function') {
+      window.KisanEventBus.publish('GATE_CALLOUT', {
+        tokenNumber,
+        gateNumber,
+        farmerName,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  // -------------------------------------------------------------
+  // 9. PUBLIC API & DOMCONTENTLOADED INITIALIZATION
   // -------------------------------------------------------------
   const KisanVoiceAssistant = {
     open: () => openPopup(),
@@ -912,7 +1002,10 @@
     stop: () => {
       stopListening();
       stopSpeaking();
-    }
+    },
+    playChime: () => playAudioChime(),
+    announceToken: (tokenNumber, gateNumber, farmerName) => announceTokenPA(tokenNumber, gateNumber, farmerName),
+    callNextToken: (tokenNumber, gateNumber, farmerName) => announceTokenPA(tokenNumber, gateNumber, farmerName)
   };
 
   window.KisanVoiceAssistant = KisanVoiceAssistant;

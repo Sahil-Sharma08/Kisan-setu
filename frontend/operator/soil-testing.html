@@ -138,6 +138,10 @@
         </div>
 
         <div class="flex flex-wrap items-center gap-2 text-xs">
+          <button type="button" id="btn-open-grain-qa"
+            class="btn bg-amber-500 hover:bg-amber-600 text-slate-950 py-2 px-3 font-bold shadow-xs flex items-center gap-1.5">
+            <span>🌾</span> फसल गुणवत्ता व CQC जांच (Grain QA)
+          </button>
           <button type="button" id="btn-open-lab-entry"
             class="btn btn-outline py-2 px-3 bg-white text-teal-800 border-teal-300 hover:bg-teal-50 font-semibold shadow-xs flex items-center gap-1.5">
             <span>📝</span> नई लैब रिपोर्ट दर्ज करें (Add Lab Report)
@@ -872,6 +876,191 @@
     </div>
   </div>
 
+  <!-- Post-Harvest Grain QA & Digital CQC Generator Modal -->
+  <div id="grain-qa-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[92vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-4">
+        <div>
+          <div class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+            <span>🌾</span> पोस्ट-हार्वेस्ट ग्रेन क्वालिटी बेंच (Grain Testing Bench)
+          </div>
+          <h3 class="text-base font-bold text-slate-900 mt-1">
+            फसल गुणवत्ता परीक्षण एवं डिजिटल CQC प्रमाणपत्र जारी करें
+          </h3>
+        </div>
+        <button type="button" id="btn-close-grain-qa-modal" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form id="grain-qa-form" class="space-y-4 text-xs">
+        <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-xl flex items-center justify-between">
+          <div>
+            <span class="text-slate-500 block text-[10px]">सरकारी खरीद मानक (FCI Standards):</span>
+            <span class="font-bold text-slate-900">नमी &le; 12.0% • बाह्य अशुद्धियां &le; 0.75% • दाना टूटन &le; 2.0%</span>
+          </div>
+          <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold text-[10px]">MSP COMPLIANT</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="qa-farmer-name" class="block font-bold text-slate-700 mb-1">किसान का नाम (Farmer Name)</label>
+            <input type="text" id="qa-farmer-name" class="form-control w-full py-2 px-3" value="राम सिंह यादव (Ram Singh Yadav)" required>
+          </div>
+          <div>
+            <label for="qa-farmer-phone" class="block font-bold text-slate-700 mb-1">मोबाइल नंबर (Mobile)</label>
+            <input type="tel" id="qa-farmer-phone" class="form-control w-full py-2 px-3 font-mono" value="9876543210" required>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="qa-crop-variety" class="block font-bold text-slate-700 mb-1">फसल एवं बीज किस्म (Crop Variety)</label>
+            <select id="qa-crop-variety" class="form-control w-full py-2 px-3 font-medium">
+              <option value="गेहूं (Wheat WH-1105 CCSHAU)">गेहूं (Wheat WH-1105 CCSHAU)</option>
+              <option value="गेहूं (Wheat HD-2967 Pusa)">गेहूं (Wheat HD-2967 Pusa)</option>
+              <option value="सरसों (Mustard RH-725)">सरसों (Mustard RH-725)</option>
+              <option value="धान (Paddy Basmati PB-1121)">धान (Paddy Basmati PB-1121)</option>
+              <option value="चना (Gram HC-5 Haryana)">चना (Gram HC-5 Haryana)</option>
+            </select>
+          </div>
+          <div>
+            <label for="qa-quantity-qtl" class="block font-bold text-slate-700 mb-1">अनुमानित मात्रा क्विंटल (Quantity Qtl)</label>
+            <input type="number" id="qa-quantity-qtl" class="form-control w-full py-2 px-3 font-mono font-bold" value="50.0" step="0.5" required>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label for="qa-moisture" class="block font-bold text-slate-700 mb-1">अनाज में नमी % (Moisture)</label>
+            <input type="number" id="qa-moisture" class="form-control w-full py-2 px-3 font-mono font-bold" value="11.4" step="0.1" required>
+            <span class="text-[10px] text-emerald-700 mt-0.5 block">मानक: &le; 12.0%</span>
+          </div>
+          <div>
+            <label for="qa-foreign-matter" class="block font-bold text-slate-700 mb-1">बाह्य पदार्थ % (Foreign Matter)</label>
+            <input type="number" id="qa-foreign-matter" class="form-control w-full py-2 px-3 font-mono font-bold" value="0.35" step="0.05" required>
+            <span class="text-[10px] text-emerald-700 mt-0.5 block">मानक: &le; 0.75%</span>
+          </div>
+          <div>
+            <label for="qa-broken-grains" class="block font-bold text-slate-700 mb-1">टूटे दाने % (Broken Grains)</label>
+            <input type="number" id="qa-broken-grains" class="form-control w-full py-2 px-3 font-mono font-bold" value="1.2" step="0.1" required>
+            <span class="text-[10px] text-emerald-700 mt-0.5 block">मानक: &le; 2.0%</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label for="qa-grain-luster" class="block font-bold text-slate-700 mb-1">दाने की चमक (Grain Luster)</label>
+            <select id="qa-grain-luster" class="form-control w-full py-2 px-3">
+              <option value="सुनहरी चमकदार (Bright Golden, Lustrous)">सुनहरी चमकदार (Bright Golden, Lustrous)</option>
+              <option value="मध्यम चमक (Medium Sheen)">मध्यम चमक (Medium Sheen)</option>
+              <option value="हल्की धुंधली (Slightly Dull)">हल्की धुंधली (Slightly Dull)</option>
+            </select>
+          </div>
+          <div>
+            <label for="qa-assigned-grade" class="block font-bold text-slate-700 mb-1">गुणवत्ता ग्रेड (Assigned Quality Grade)</label>
+            <select id="qa-assigned-grade" class="form-control w-full py-2 px-3 font-bold text-emerald-800">
+              <option value="Grade A (FAQ Plus - Premium Bonus)">Grade A (FAQ Plus - Premium Bonus)</option>
+              <option value="Grade B (FAQ Standard - Base MSP)">Grade B (FAQ Standard - Base MSP)</option>
+              <option value="Grade C (Below Standard)">Grade C (Below Standard)</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label for="qa-summary" class="block font-bold text-slate-700 mb-1">गुणवत्ता अधिकारी टिप्पणी (QA Officer Summary)</label>
+          <textarea id="qa-summary" class="form-control w-full py-2 px-3 text-xs" rows="2">दाना सुडौल, नमी मानक सीमा में एवं चमक उत्कृष्ट है। खरीद हेतु Grade A उपयुक्त पाया गया।</textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-200">
+          <button type="button" id="btn-cancel-grain-qa" class="btn btn-outline py-2 px-4">रद्द करें</button>
+          <button type="submit" class="btn btn-primary bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2 px-5 flex items-center gap-1.5">
+            <span>📜</span> डिजिटल CQC प्रमाणपत्र जारी करें
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Digital Crop Quality Certificate (CQC) Viewer Modal -->
+  <div id="cqc-view-modal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 border border-slate-300">
+      <div class="border-2 border-slate-800 rounded-xl p-5 bg-white">
+        
+        <!-- Cert Header -->
+        <div class="text-center pb-3 border-b-2 border-slate-800 mb-4">
+          <div class="text-[11px] font-bold uppercase tracking-widest text-slate-500">हरियाणा राज्य कृषि विपणन बोर्ड (HSAMB)</div>
+          <h2 class="text-lg font-black text-slate-900 tracking-tight">डिजिटल फसल गुणवत्ता प्रमाणपत्र</h2>
+          <div class="text-[10px] font-mono font-bold text-teal-800">DIGITAL CROP QUALITY CERTIFICATE (CQC)</div>
+          <div class="flex items-center justify-between mt-2 pt-1 border-t border-slate-200 text-xs font-mono">
+            <span class="font-bold text-teal-900" id="cqc-cert-number">CQC-ROH-2026-8812</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold" id="cqc-badge-grade">Grade A</span>
+          </div>
+        </div>
+
+        <!-- Details Grid -->
+        <div class="grid grid-cols-2 gap-2 text-xs mb-4">
+          <div><span class="text-slate-500">किसान का नाम:</span> <strong class="text-slate-900" id="cqc-farmer">राम सिंह यादव</strong></div>
+          <div><span class="text-slate-500">मोबाइल:</span> <strong class="font-mono text-slate-900" id="cqc-phone">9876543210</strong></div>
+          <div><span class="text-slate-500">फसल:</span> <strong class="text-slate-900" id="cqc-crop">गेहूं (WH-1105)</strong></div>
+          <div><span class="text-slate-500">मात्रा:</span> <strong class="font-mono text-slate-900" id="cqc-qty">50.0 क्विंटल</strong></div>
+          <div><span class="text-slate-500">जांच केंद्र:</span> <strong class="text-slate-900">रोहतक सेंट्रल लैब</strong></div>
+          <div><span class="text-slate-500">तारीख:</span> <strong class="font-mono text-slate-900" id="cqc-date">15/09/2026</strong></div>
+        </div>
+
+        <!-- QA Parameters Table -->
+        <table class="w-full text-xs text-left border border-slate-300 rounded-lg overflow-hidden mb-4">
+          <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-300">
+            <tr>
+              <th scope="col" class="p-2">परीक्षण मानक (Parameter)</th>
+              <th scope="col" class="p-2 text-center">परीक्षित मान (Value)</th>
+              <th scope="col" class="p-2 text-right">FCI मानक सीमा</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 font-mono">
+            <tr>
+              <td class="p-2 font-sans font-medium">अनाज में नमी (Moisture)</td>
+              <td class="p-2 text-center font-bold text-teal-800" id="cqc-val-moisture">11.4%</td>
+              <td class="p-2 text-right text-slate-600">&le; 12.0% (पास ✔)</td>
+            </tr>
+            <tr>
+              <td class="p-2 font-sans font-medium">बाह्य अशुद्धियां (Foreign Matter)</td>
+              <td class="p-2 text-center font-bold text-teal-800" id="cqc-val-foreign">0.35%</td>
+              <td class="p-2 text-right text-slate-600">&le; 0.75% (पास ✔)</td>
+            </tr>
+            <tr>
+              <td class="p-2 font-sans font-medium">टूटे दाने (Broken Grains)</td>
+              <td class="p-2 text-center font-bold text-teal-800" id="cqc-val-broken">1.2%</td>
+              <td class="p-2 text-right text-slate-600">&le; 2.0% (पास ✔)</td>
+            </tr>
+            <tr>
+              <td class="p-2 font-sans font-medium">दाने की चमक (Grain Luster)</td>
+              <td class="p-2 text-center font-bold text-teal-800 font-sans" id="cqc-val-luster">सुनहरी चमकदार</td>
+              <td class="p-2 text-right text-emerald-700 font-sans font-bold">उत्कृष्ट (Grade A)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Summary & Digital Stamp -->
+        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg text-xs mb-4">
+          <span class="text-slate-500 font-medium">अधिकारी संस्तुति:</span>
+          <p class="font-medium text-slate-800 mt-0.5" id="cqc-officer-summary">दाना सुडौल एवं नमी मानक सीमा में है। Grade A बोनस भुगतान अनुमोदित।</p>
+        </div>
+
+        <div class="flex items-center justify-between text-[10px] text-slate-500 pt-2 border-t border-slate-200">
+          <div>डिजिटल हस्ताक्षर ID: <strong class="font-mono text-slate-800" id="cqc-hash">e4f7a91b8c24</strong></div>
+          <div class="font-mono">KisanSetu • Smart Mandi SIH26032</div>
+        </div>
+
+      </div>
+
+      <div class="flex items-center justify-end gap-2 mt-4">
+        <button type="button" id="btn-close-cqc-view" class="btn btn-outline py-2 px-4 text-xs font-bold">बंद करें (Close)</button>
+        <button type="button" onclick="window.print()" class="btn btn-primary bg-teal-700 hover:bg-teal-800 text-white py-2 px-5 text-xs font-bold flex items-center gap-1.5">
+          <span>🖨️</span> प्रिंट प्रमाणपत्र (Print CQC)
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Simple Footer -->
   <footer class="py-4 text-center text-xs text-slate-400 border-t border-slate-200 bg-white no-print">
     KisanSetu &copy; 2026 • SIH Project • Soil Testing & Agronomic Extension Service
@@ -1374,6 +1563,67 @@
 
         labModal.classList.add('hidden');
         verifyFarmer(phone);
+      });
+
+      // Grain QA & CQC Modal Triggers
+      const grainQaModal = document.getElementById('grain-qa-modal');
+      const cqcViewModal = document.getElementById('cqc-view-modal');
+
+      document.getElementById('btn-open-grain-qa')?.addEventListener('click', () => {
+        grainQaModal.classList.remove('hidden');
+      });
+
+      document.getElementById('btn-close-grain-qa-modal')?.addEventListener('click', () => {
+        grainQaModal.classList.add('hidden');
+      });
+
+      document.getElementById('btn-cancel-grain-qa')?.addEventListener('click', () => {
+        grainQaModal.classList.add('hidden');
+      });
+
+      document.getElementById('btn-close-cqc-view')?.addEventListener('click', () => {
+        cqcViewModal.classList.add('hidden');
+      });
+
+      // Handle Grain QA form submission & CQC generation
+      document.getElementById('grain-qa-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const farmer = document.getElementById('qa-farmer-name').value.trim();
+        const phone = document.getElementById('qa-farmer-phone').value.trim();
+        const crop = document.getElementById('qa-crop-variety').value;
+        const qty = document.getElementById('qa-quantity-qtl').value;
+        const moisture = document.getElementById('qa-moisture').value;
+        const foreign = document.getElementById('qa-foreign-matter').value;
+        const broken = document.getElementById('qa-broken-grains').value;
+        const luster = document.getElementById('qa-grain-luster').value;
+        const grade = document.getElementById('qa-assigned-grade').value;
+        const summary = document.getElementById('qa-summary').value;
+
+        // Generate CQC ID
+        const randomHex = Math.floor(1000 + Math.random() * 9000);
+        const certNo = `CQC-ROH-2026-${randomHex}`;
+        const hash = Math.random().toString(16).substring(2, 14);
+
+        // Populate certificate
+        document.getElementById('cqc-cert-number').textContent = certNo;
+        document.getElementById('cqc-badge-grade').textContent = grade.split(' ')[0] + ' ' + (grade.split(' ')[1] || '');
+        document.getElementById('cqc-farmer').textContent = farmer;
+        document.getElementById('cqc-phone').textContent = phone;
+        document.getElementById('cqc-crop').textContent = crop;
+        document.getElementById('cqc-qty').textContent = `${qty} क्विंटल`;
+        document.getElementById('cqc-date').textContent = new Date().toLocaleDateString('hi-IN');
+        document.getElementById('cqc-val-moisture').textContent = `${moisture}%`;
+        document.getElementById('cqc-val-foreign').textContent = `${foreign}%`;
+        document.getElementById('cqc-val-broken').textContent = `${broken}%`;
+        document.getElementById('cqc-val-luster').textContent = luster.split(' ')[0];
+        document.getElementById('cqc-officer-summary').textContent = summary;
+        document.getElementById('cqc-hash').textContent = hash;
+
+        // Close form & open cert view
+        grainQaModal.classList.add('hidden');
+        cqcViewModal.classList.remove('hidden');
+
+        alert(`✅ डिजिटल CQC प्रमाणपत्र #${certNo} सफलतापूर्वक जारी किया गया!`);
       });
 
       // Initial verification on page load

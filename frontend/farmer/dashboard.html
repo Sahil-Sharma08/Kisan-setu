@@ -93,6 +93,27 @@
   <!-- Main Dashboard View -->
   <main class="container mx-auto py-6 sm:py-8 px-4 flex-1">
 
+    <!-- Real-time Mandi Price Ticker (Agmarknet Live API) -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 mb-6 shadow-sm overflow-hidden flex items-center gap-3">
+      <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-black uppercase tracking-wider shrink-0">
+        <span class="w-2 h-2 rounded-full bg-emerald-300 animate-ping"></span>
+        <span>लाइव मंडी भाव</span>
+      </div>
+      <div class="overflow-hidden whitespace-nowrap flex-1" id="mandi-ticker-track">
+        <div class="inline-flex items-center gap-6 text-xs text-slate-300" id="mandi-ticker-items">
+          <span>🌾 गेहूं (Wheat WH-1105): <strong class="text-emerald-400 font-mono">₹2,425/Q</strong> (रोहतक APMC)</span>
+          <span class="text-slate-600">•</span>
+          <span>🌾 धान (Paddy Basmati): <strong class="text-emerald-400 font-mono">₹3,950/Q</strong> (रोहतक APMC)</span>
+          <span class="text-slate-600">•</span>
+          <span>🌻 सरसों (Mustard RH-725): <strong class="text-emerald-400 font-mono">₹5,650/Q</strong> (महम APMC)</span>
+          <span class="text-slate-600">•</span>
+          <span>🌱 चना (Gram HC-5): <strong class="text-emerald-400 font-mono">₹5,420/Q</strong> (कलानौर APMC)</span>
+          <span class="text-slate-600">•</span>
+          <span>🌾 बाजरा (Bajra HHB-67): <strong class="text-emerald-400 font-mono">₹2,250/Q</strong> (महम APMC)</span>
+        </div>
+      </div>
+    </div>
+
     <!-- 1. Welcome Section & Primary CTA -->
     <div class="card bg-gradient-to-r from-emerald-50 via-white to-white border-emerald-200 p-6 mb-6 shadow-xs">
       <div class="flex flex-wrap items-center justify-between gap-4">
@@ -412,6 +433,44 @@
       <!-- RIGHT 1 COLUMN: Farmer Profile Summary & Support -->
       <div class="space-y-6">
 
+        <!-- Live Agro-Weather & Field Advisory Card (WeatherAPI.com) -->
+        <div class="card p-5 bg-gradient-to-br from-slate-900 via-slate-900 to-slate-950 text-white border-slate-800 shadow-md">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🌤️</span>
+              <div>
+                <h3 class="text-xs font-black uppercase tracking-wider text-emerald-400">लाइव कृषि मौसम (Agro-Weather)</h3>
+                <span class="text-[10px] text-slate-400 font-mono" id="weather-location">रोहतक, हरियाणा</span>
+              </div>
+            </div>
+            <button type="button" id="refresh-weather-btn" class="p-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs transition-colors" title="Refresh Weather">
+              🔄
+            </button>
+          </div>
+
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-3">
+              <img id="weather-icon" src="https://cdn.weatherapi.com/weather/64x64/day/116.png" alt="Weather" class="w-12 h-12">
+              <div>
+                <div class="text-2xl font-black font-mono" id="weather-temp">31°C</div>
+                <div class="text-[11px] text-slate-300" id="weather-condition">धूप व हल्के बादल</div>
+              </div>
+            </div>
+            <div class="text-right text-[11px] font-mono space-y-0.5 text-slate-400">
+              <div>आर्द्रता: <strong class="text-slate-200" id="weather-humidity">58%</strong></div>
+              <div>हवा: <strong class="text-slate-200" id="weather-wind">14 km/h</strong></div>
+              <div>वर्षा: <strong class="text-slate-200" id="weather-precip">0.0 mm</strong></div>
+            </div>
+          </div>
+
+          <div class="p-2.5 rounded-lg bg-emerald-950/60 border border-emerald-800/80 text-xs flex items-start gap-2" id="weather-advisory-box">
+            <span class="text-emerald-400 text-sm mt-0.5">🌾</span>
+            <div class="text-[11px] leading-relaxed text-emerald-200" id="weather-advisory-text">
+              मृदा नमूना संग्रह, डीएपी बेसल डोज अनुप्रयोग एवं अनाज तुलाई हेतु मौसम बिल्कुल अनुकूल है।
+            </div>
+          </div>
+        </div>
+
         <!-- 5. Farmer Profile Summary Card -->
         <div id="profile-summary" class="card p-6 bg-white border-slate-200 shadow-xs">
           <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
@@ -547,9 +606,53 @@
   <script src="farmer.js"></script>
   <script src="../js/complaints.js"></script>
   <script src="../js/voice-assistant.js"></script>
+  <script src="../js/agri-api.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Initialize Agri API (Weather & Live Mandi Prices)
+      if (window.KisanAgriService) {
+        async function loadAgriTelemetry() {
+          try {
+            const w = await window.KisanAgriService.fetchLiveWeather('Rohtak');
+            if (w) {
+              const loc = document.getElementById('weather-location');
+              const tmp = document.getElementById('weather-temp');
+              const cnd = document.getElementById('weather-condition');
+              const hum = document.getElementById('weather-humidity');
+              const wnd = document.getElementById('weather-wind');
+              const prc = document.getElementById('weather-precip');
+              const icn = document.getElementById('weather-icon');
+              const adv = document.getElementById('weather-advisory-text');
+
+              if (loc) loc.textContent = `${w.location}, ${w.region}`;
+              if (tmp) tmp.textContent = `${w.tempC}°C`;
+              if (cnd) cnd.textContent = w.conditionText;
+              if (hum) hum.textContent = `${w.humidity}%`;
+              if (wnd) wnd.textContent = `${w.windKph} km/h`;
+              if (prc) prc.textContent = `${w.precipMm} mm`;
+              if (icn && w.iconUrl) icn.src = w.iconUrl;
+              if (adv && w.agroAdvice) adv.textContent = w.agroAdvice.desc;
+            }
+
+            const records = await window.KisanAgriService.fetchMandiPrices();
+            if (records && records.length > 0) {
+              const tickerItems = document.getElementById('mandi-ticker-items');
+              if (tickerItems) {
+                tickerItems.innerHTML = records.slice(0, 8).map(m => `
+                  <span>🌾 ${m.commodity} (${m.variety}): <strong class="text-emerald-400 font-mono">₹${m.modal_price}/Q</strong> (${m.market})</span>
+                `).join('<span class="text-slate-600">•</span>');
+              }
+            }
+          } catch (e) {
+            console.warn("Agri telemetry loading note:", e);
+          }
+        }
+        loadAgriTelemetry();
+
+        const refBtn = document.getElementById('refresh-weather-btn');
+        if (refBtn) refBtn.addEventListener('click', loadAgriTelemetry);
+      }
       // 1. Enforce Farmer route protection
       const user = window.KisanAuth.requireAuth('farmer', '../pages/login.html');
       if (!user) return;
