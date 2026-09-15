@@ -13,6 +13,7 @@
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="../js/i18n.js"></script>
 
   <!-- Core Design System -->
   <link rel="stylesheet" href="../css/style.css">
@@ -26,21 +27,37 @@
     <div class="container mx-auto flex items-center justify-between">
       <div class="flex items-center gap-3">
         <a href="../index.html" class="flex items-center gap-2.5 text-decoration-none">
-        <div class="w-8 h-8 rounded-lg bg-[#15803d] text-white flex items-center justify-center font-bold text-sm">
-          K
+          <div class="w-8 h-8 rounded-lg bg-[#15803d] text-white flex items-center justify-center font-bold text-sm">
+            K
+          </div>
+          <div>
+            <span class="text-lg font-bold text-slate-900 tracking-tight">KisanSetu</span>
+            <span class="text-xs text-slate-500 ml-1">| Farmer Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Language Switcher Option (English / Hindi) -->
+        <div class="kisan-lang-switcher inline-flex items-center rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs font-semibold shadow-2xs"
+          title="Change language / भाषा बदलें">
+          <button type="button" data-lang="en" onclick="window.KisanI18n && window.KisanI18n.setLanguage('en')"
+            class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+            EN
+          </button>
+          <button type="button" data-lang="hi" onclick="window.KisanI18n && window.KisanI18n.setLanguage('hi')"
+            class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+            हिन्दी
+          </button>
         </div>
-        <div>
-          <span class="text-lg font-bold text-slate-900 tracking-tight">KisanSetu</span>
-          <span class="text-xs text-slate-500 ml-1">| Farmer Portal</span>
-        </div>
-      </a>
-      <a href="../index.html"
-        class="text-xs font-medium text-slate-600 hover:text-[#15803d] flex items-center gap-1 transition-colors">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-        </svg>
-        Back to Home
-      </a>
+
+        <a href="../index.html"
+          class="text-xs font-medium text-slate-600 hover:text-[#15803d] flex items-center gap-1 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          Back to Home
+        </a>
       </div>
     </div>
   </header>

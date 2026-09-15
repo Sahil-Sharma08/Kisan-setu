@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>स्लॉट बुकिंग | Slot Booking — KisanSetu</title>
+  <title>Slot Booking | KisanSetu</title>
+  <script src="../js/i18n.js"></script>
 
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,11 +44,18 @@
 
       <!-- Navigation & Logout -->
       <div class="flex items-center gap-3">
-        <!-- Language Switcher -->
-        <button type="button" onclick="window.KisanI18n && window.KisanI18n.toggleLanguage()"
-          class="kisan-lang-btn px-2.5 py-1.5 rounded-lg text-xs font-bold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-all shadow-2xs cursor-pointer">
-          English / हिन्दी
-        </button>
+        <!-- Language Switcher Option (English / Hindi) -->
+        <div class="kisan-lang-switcher inline-flex items-center rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs font-semibold shadow-2xs"
+          title="Change language / भाषा बदलें">
+          <button type="button" data-lang="en" onclick="window.KisanI18n && window.KisanI18n.setLanguage('en')"
+            class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+            EN
+          </button>
+          <button type="button" data-lang="hi" onclick="window.KisanI18n && window.KisanI18n.setLanguage('hi')"
+            class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+            हिन्दी
+          </button>
+        </div>
 
         <button type="button" onclick="window.KisanVoiceAssistant && window.KisanVoiceAssistant.open()"
           class="btn btn-outline btn-sm text-xs font-semibold flex items-center gap-1.5 py-1.5 px-3 text-[#15803d] border-[#15803d] bg-emerald-50/50 hover:bg-emerald-100/60 cursor-pointer">

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mandi Superintendent Command Center | नियंत्रण कक्ष — KisanSetu</title>
+  <title>Mandi Superintendent Command Center | KisanSetu</title>
 
   <!-- Google Fonts: Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -83,6 +83,19 @@
 
         <!-- Navigation Tabs & Actions -->
         <div class="flex items-center gap-3">
+          <!-- Language Switcher Option (English / Hindi) -->
+          <div class="kisan-lang-switcher inline-flex items-center rounded-lg border border-slate-700 bg-slate-800 p-0.5 text-xs font-semibold shadow-xs"
+            title="Change language / भाषा बदलें">
+            <button type="button" data-lang="en" onclick="window.KisanI18n && window.KisanI18n.setLanguage('en')"
+              class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+              EN
+            </button>
+            <button type="button" data-lang="hi" onclick="window.KisanI18n && window.KisanI18n.setLanguage('hi')"
+              class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+              हिन्दी
+            </button>
+          </div>
+
           <a href="../yard-screen.html" target="_blank"
             class="btn btn-outline btn-sm text-xs font-bold py-1.5 px-3 border-teal-500/60 text-teal-300 hover:bg-teal-950 flex items-center gap-1.5">
             <span>📺</span> Live Yard Billboard
@@ -140,9 +153,8 @@
         class="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col justify-between">
         <div class="flex flex-wrap items-center justify-between gap-2 mb-4 border-b border-slate-800 pb-3">
           <div>
-            <span class="text-xs font-bold text-teal-400 uppercase tracking-wider">Real-Time Intake &amp; Tonnage
-              Gauge</span>
-            <h1 class="text-xl font-black text-white">दैनिक खरीद टन भार मापक (Procurement Tonnage Gauge)</h1>
+            <span class="text-xs font-bold text-teal-400 uppercase tracking-wider" data-i18n="supt.tonnageGauge">Mandi Yard Tonnage Gauge</span>
+            <h1 class="text-xl font-black text-white" data-i18n="supt.title">Procurement Tonnage Gauge</h1>
           </div>
           <span
             class="text-xs font-mono font-bold px-2.5 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700">
@@ -215,19 +227,18 @@
 
           <div class="space-y-3">
             <div>
-              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Reason for Halt (कारण)</label>
+              <label for="cb-reason-select" class="block text-[11px] font-bold text-slate-400 uppercase mb-1" data-i18n="supt.reasonHalt">Reason for Halt</label>
               <select id="cb-reason-select"
                 class="w-full bg-slate-950 border border-slate-700 text-xs font-bold rounded-lg p-2.5 text-slate-200 focus:ring-1 focus:ring-rose-500">
-                <option value="RAIN">अचानक भारी बारिश (Sudden Unseasonal Rain)</option>
-                <option value="MACHINE_BREAKDOWN">वेईब्रिज मशीन खराबी (Weighbridge Breakdown)</option>
-                <option value="GODOWN_SATURATED">गोदाम क्षमता पूर्ण (Godown Saturation Limit)</option>
-                <option value="GRID_OUTAGE">विद्युत ग्रिड विफलता (Power Grid Outage)</option>
+                <option value="RAIN">Sudden Unseasonal Rain (अचानक भारी बारिश)</option>
+                <option value="MACHINE_BREAKDOWN">Weighbridge Breakdown (वेईब्रिज मशीन खराबी)</option>
+                <option value="GODOWN_SATURATED">Godown Saturation Limit (गोदाम क्षमता पूर्ण)</option>
+                <option value="GRID_OUTAGE">Power Grid Outage (विद्युत ग्रिड विफलता)</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Deferral Duration (स्थगित
-                अवधि)</label>
+              <label for="cb-defer-select" class="block text-[11px] font-bold text-slate-400 uppercase mb-1" data-i18n="supt.deferDuration">Deferral Duration</label>
               <select id="cb-defer-select"
                 class="w-full bg-slate-950 border border-slate-700 text-xs font-bold rounded-lg p-2.5 text-slate-200 focus:ring-1 focus:ring-rose-500">
                 <option value="1">1 Hour Deferral (+60 Mins)</option>
@@ -257,9 +268,9 @@
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
         <div>
-          <span class="text-xs font-bold text-teal-400 uppercase tracking-wider">End-to-End Turnaround Analytics</span>
-          <h2 class="text-lg font-black text-white">
-            चरण विलंबता एवं रुकावट ट्रैकर (Stage Latency &amp; Bottleneck Detector)
+          <span class="text-xs font-bold text-teal-400 uppercase tracking-wider" data-i18n="supt.stageLatency">End-to-End Turnaround Analytics</span>
+          <h2 class="text-lg font-black text-white" data-i18n="supt.stageLatencyTitle">
+            Stage Latency &amp; Bottleneck Detector
           </h2>
         </div>
         <div id="bottleneck-indicator-badge"
@@ -561,6 +572,7 @@
   <script src="../js/auth.js"></script>
   <script src="../js/event-bus.js"></script>
   <script src="../js/state-machine.js"></script>
+  <script src="../js/i18n.js"></script>
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {

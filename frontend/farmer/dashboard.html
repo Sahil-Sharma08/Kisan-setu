@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>किसान डैशबोर्ड | Farmer Dashboard — KisanSetu</title>
+  <title>Farmer Dashboard | KisanSetu</title>
+  <script src="../js/i18n.js"></script>
 
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,16 +34,29 @@
         <div>
           <div class="flex items-center gap-2">
             <span class="text-base font-bold text-slate-900 tracking-tight">KisanSetu</span>
-            <span class="text-xs text-slate-400">| किसान सेतु</span>
+            <span class="text-xs text-slate-400">| Farmer Portal</span>
           </div>
-          <div class="text-[11px] font-semibold text-[#15803d] -mt-0.5">
-            किसान पोर्टल (Farmer Portal)
+          <div class="text-[11px] font-semibold text-[#15803d] -mt-0.5" data-i18n="nav.farmerPortalSub">
+            Farmer Procurement & Queue Portal
           </div>
         </div>
       </div>
 
       <!-- Right Header Actions -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2.5">
+        <!-- Language Switcher Option (English / Hindi) -->
+        <div class="kisan-lang-switcher inline-flex items-center rounded-lg border border-slate-200 bg-slate-100 p-0.5 text-xs font-semibold shadow-2xs"
+          title="Change language / भाषा बदलें">
+          <button type="button" data-lang="en" onclick="window.KisanI18n && window.KisanI18n.setLanguage('en')"
+            class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+            EN
+          </button>
+          <button type="button" data-lang="hi" onclick="window.KisanI18n && window.KisanI18n.setLanguage('hi')"
+            class="px-2.5 py-1 rounded-md transition-all cursor-pointer">
+            हिन्दी
+          </button>
+        </div>
+
         <!-- Profile Pill Shortcut -->
         <a href="#profile-summary"
           class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors text-xs text-slate-700">
@@ -51,40 +65,40 @@
             id="header-avatar-initial">
             K
           </div>
-          <span class="font-semibold text-slate-900" id="header-user-name">लोड हो रहा है...</span>
+          <span class="font-semibold text-slate-900" id="header-user-name">Loading...</span>
         </a>
 
         <button type="button" onclick="window.KisanVoiceAssistant && window.KisanVoiceAssistant.open()"
           class="btn btn-outline btn-sm text-xs font-semibold flex items-center gap-1.5 py-1.5 px-3 text-[#15803d] border-[#15803d] bg-emerald-50/50 hover:bg-emerald-100/60 cursor-pointer">
-          <span>🎙️</span> किसान वाणी AI
+          <span>🎙️</span> <span data-i18n="nav.voiceAssistant">Kisan Vani AI</span>
         </button>
 
         <a href="soil-testing.html"
           class="btn btn-outline btn-sm text-xs font-semibold flex items-center gap-1 py-1.5 px-3 text-emerald-800 border-emerald-300 hover:bg-emerald-50">
-          <span>🧪</span> मृदा परीक्षण (Soil Health)
+          <span>🧪</span> <span data-i18n="nav.soilTesting">Soil Health</span>
         </a>
 
         <a href="sales-history.html"
           class="btn btn-outline btn-sm text-xs font-semibold flex items-center gap-1 py-1.5 px-3 text-slate-700 hover:bg-slate-50">
-          <span>🌾</span> विक्रय इतिहास (Sales History)
+          <span>🌾</span> <span data-i18n="nav.salesHistory">Sales History</span>
         </a>
 
         <a href="bookings.html"
           class="btn btn-outline btn-sm text-xs font-semibold flex items-center gap-1 py-1.5 px-3 text-slate-700 hover:bg-slate-50">
-          <span>📋</span> मेरी बुकिंग (My Bookings)
+          <span>📋</span> <span data-i18n="nav.myBookings">My Bookings</span>
         </a>
 
         <a href="complaints.html"
           class="btn btn-outline btn-sm text-xs font-semibold flex items-center gap-1 py-1.5 px-3 text-slate-700 hover:bg-slate-50">
-          <span>⚖️</span> शिकायतें (Complaints)
+          <span>⚖️</span> <span data-i18n="nav.complaints">Complaints</span>
         </a>
 
-        <span class="badge badge-success text-[11px] py-1 px-2.5 hidden md:inline-flex">
-          सक्रिय सत्र (Active)
+        <span class="badge badge-success text-[11px] py-1 px-2.5 hidden md:inline-flex" data-i18n="nav.activeSession">
+          Active
         </span>
 
-        <button type="button" id="logout-btn" class="btn btn-outline btn-sm text-xs py-1.5 px-3">
-          लॉगआउट (Logout)
+        <button type="button" id="logout-btn" class="btn btn-outline btn-sm text-xs py-1.5 px-3" data-i18n="nav.logout">
+          Logout
         </button>
       </div>
     </div>
@@ -97,7 +111,7 @@
     <div class="bg-slate-900 border border-slate-800 rounded-xl p-2.5 mb-6 shadow-sm overflow-hidden flex items-center gap-3">
       <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-[11px] font-black uppercase tracking-wider shrink-0">
         <span class="w-2 h-2 rounded-full bg-emerald-300 animate-ping"></span>
-        <span>लाइव मंडी भाव</span>
+        <span data-i18n="common.liveMandiRates">Live Mandi Rates</span>
       </div>
       <div class="overflow-hidden whitespace-nowrap flex-1" id="mandi-ticker-track">
         <div class="inline-flex items-center gap-6 text-xs text-slate-300" id="mandi-ticker-items">
